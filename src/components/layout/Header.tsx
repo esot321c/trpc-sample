@@ -15,7 +15,7 @@ import { ThemeContext } from "@contexts/ThemeContext";
 import { useRouter } from 'next/router';
 import Logo from '@components/svgs/Logo';
 import NotificationsMenu from '@components/notifications/NotificationsMenu'
-import UserMenu from '@/src/components/user/UserMenu';
+import UserMenu from '@src/components/user/UserMenu';
 import SocialGrid from './SocialGrid';
 
 const pages = [
