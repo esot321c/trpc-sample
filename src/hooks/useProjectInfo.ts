@@ -1,5 +1,5 @@
+import { axiosGetFetcher } from "@utils/axios";
 import useSWR from "swr";
-import { axiosGetFetcher } from "../utilities/axios";
 
 export const useProjectInfo = (projectName: string) => {
   const { data, error } = useSWR(`${process.env.API_URL}/projects/${projectName}`, axiosGetFetcher);

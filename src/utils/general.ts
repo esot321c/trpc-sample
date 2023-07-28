@@ -63,12 +63,14 @@ export const slugify = (str: string) => {
     .replace(/[^\w\s-]/g, "") // Remove special characters
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
-  return encodeURIComponent(
-    [...slug]
-      .map((c) => (urlSafeChars.test(c) ? c : encodeURIComponent(c)))
-      .join("")
-  );
-}
+
+  let encodedSlug = '';
+  for (let i = 0; i < slug.length; i++) {
+    encodedSlug += urlSafeChars.test(slug[i]) ? slug[i] : encodeURIComponent(slug[i]);
+  }
+
+  return encodeURIComponent(encodedSlug);
+};
 
 export const getShortAddress = (address: string): string => {
   let shortAddress = address ? address : '';
