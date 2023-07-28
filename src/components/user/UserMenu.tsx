@@ -18,7 +18,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import SellIcon from '@mui/icons-material/Sell';
 import EditIcon from '@mui/icons-material/Edit';
-import AddWallet from '@/src/components/user copy/AddWallet';
+import AddWallet from '@/src/components/user/AddWallet';
 import { useWallet, useWalletList, useAddress } from '@meshsdk/react';
 import { getShortAddress } from '@utils/general';
 import { SxProps } from '@mui/system';
