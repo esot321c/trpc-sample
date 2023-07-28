@@ -20,8 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
       "@src/*": ["./src/*"],
+      "@lib/*": ["./lib/*"],
       "@components/*": ["./src/components/*"],
       "@styles/*": ["./src/styles/*"],
       "@public/*": ["./public/*"],
@@ -32,7 +32,7 @@
       "@server/*": ["./src/server/*"],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/Header.tsxs/Header.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"],
   "typeRoots": ["./types", "./node_modules/@types"]
 }

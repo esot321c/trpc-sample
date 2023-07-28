@@ -12,7 +12,6 @@ import {
   MenuList,
   Chip
 } from "@mui/material";
-import Progress from "@components/Progress";
 import { v4 as uuidv4 } from 'uuid';
 import CustomMenuItem from "@components/notifications/CustomMenuItem";
 
@@ -58,7 +57,7 @@ const NotificationsPage: NextPage = () => {
 
   return (
     <Container>
-      <Progress loading={loading} />
+      
       {!loading &&
         (
           <Grid
