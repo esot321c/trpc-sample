@@ -33,10 +33,9 @@ interface IWalletType {
 }
 
 interface IUserMenuProps {
-  sx?: SxProps;
 }
 
-const UserMenu: FC<IUserMenuProps> = React.memo(({ sx }) => {
+const UserMenu: FC<IUserMenuProps> = () => {
   const theme = useTheme()
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false)
@@ -166,6 +165,6 @@ const UserMenu: FC<IUserMenuProps> = React.memo(({ sx }) => {
       <AddWallet open={modalOpen} setOpen={setModalOpen} />
     </>
   );
-});
+}
 
 export default UserMenu;
