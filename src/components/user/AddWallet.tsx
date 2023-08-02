@@ -1,5 +1,4 @@
-import React, { FC, useEffect, useContext } from "react";
-import { useRouter } from "next/router";
+import React, { FC, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -26,12 +25,11 @@ interface IAddWallet {
 }
 
 export const AddWallet: FC<IAddWallet> = ({ open, setOpen }) => {
-  const router = useRouter();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const wallets = useWalletList();
   const walletContext = useWallet()
-  const connectedWalletAddress = useAddress(0);
+  const connectedWalletAddress = useAddress();
 
   useEffect(() => {
     // load primary address

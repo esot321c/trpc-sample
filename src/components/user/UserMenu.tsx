@@ -22,6 +22,9 @@ import AddWallet from '@src/components/user/AddWallet';
 import { useWallet, useWalletList, useAddress } from '@meshsdk/react';
 import { getShortAddress } from '@utils/general';
 import { SxProps } from '@mui/system';
+import { useSession } from 'next-auth/react';
+import { trpc } from "@utils/trpc";
+import { signIn } from "next-auth/react"
 
 const WALLET_ADDRESS = "wallet_address_coinecta";
 const WALLET_NAME = "wallet_name_coinecta";
@@ -41,7 +44,71 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const walletContext = useWallet()
   const walletList = useWalletList();
-  const connectedWalletAddress = useAddress(0);
+  const connectedWalletAddress = useAddress();
+  const [rewardAddress, setRewardAddress] = useState<string | undefined>(undefined);
+  const result = trpc.user.getNonce.useQuery({ userAddress: rewardAddress }, { enabled: false, retry: false });
+  const [newNonce, setNewNonce] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (walletContext.connected) {
+      async function getUserAddress() {
+        const address = await walletContext.wallet.getRewardAddresses();
+        console.log('connected Wallet Address: ' + connectedWalletAddress)
+        console.log('got user address: ' + address[0])
+        setRewardAddress(address[0]);
+      }
+      getUserAddress();
+
+    }
+  }, [walletContext.connected]);
+
+  useEffect(() => {
+    console.log('connected: ' + walletContext.connected)
+    console.log('rewardAddress: ' + rewardAddress)
+    if (rewardAddress && walletContext.connected) {
+      result.refetch();
+      console.log('result refetched')
+    }
+  }, [rewardAddress]);
+
+  useEffect(() => {
+    if (result?.data?.nonce !== null && result?.data?.nonce !== undefined) {
+      setNewNonce(result.data.nonce)
+    }
+  }, [result.data])
+
+  useEffect(() => {
+    if (newNonce && rewardAddress) {
+      console.log('verifying ownership with nonce: ' + newNonce)
+      verifyOwnership(newNonce, rewardAddress)
+    }
+  }, [newNonce])
+
+  const verifyOwnership = (nonce: string, address: string) => {
+    if (!session.data) {
+      walletContext.wallet.signData(address, nonce)
+        .then(signature => {
+          console.log(signature)
+          return signIn("credentials", {
+            nonce,
+            rewardAddress: rewardAddress,
+            signature: JSON.stringify(signature),
+            wallet: JSON.stringify({
+              type: walletContext.name,
+              rewardAddress,
+              address: connectedWalletAddress
+            }),
+            redirect: false
+          });
+        })
+        .then(response => {
+          console.log(response)
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  }
 
   const filterByName = (arr: IWalletType[], name: string) => {
     return arr.filter(item => item.name === name);
@@ -64,8 +131,15 @@ const UserMenu: FC<IUserMenuProps> = () => {
     walletContext.disconnect()
   };
 
+  const session = useSession()
+
   return (
     <>
+      {session && (
+        <>
+          {session.status}
+        </>
+      )}
       {walletContext.connected ? (
         <>
           <IconButton

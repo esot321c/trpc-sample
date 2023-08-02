@@ -9,6 +9,7 @@ import {
   Backdrop,
   CircularProgress
 } from "@mui/material";
+import { useSession } from "next-auth/react"
 
 const variants = {
   hidden: { opacity: 0, x: 0, y: 500 },
@@ -23,6 +24,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setBackdrop(false)
   }, [])
+
+  const { data: session } = useSession()
 
   return (
     <>
@@ -42,10 +45,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           zIndex: 999,
           color: '#fff',
           transition: 'opacity 500ms',
-          pointerEvents: backdrop ? 'auto' : 'none' 
+          pointerEvents: backdrop ? 'auto' : 'none'
         }}
       >
-        <CircularProgress color="inherit" sx={{ 
+        <CircularProgress color="inherit" sx={{
           position: "absolute",
           top: "50%",
           left: "50%",
