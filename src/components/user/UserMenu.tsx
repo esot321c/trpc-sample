@@ -101,7 +101,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
             redirect: false
           });
         })
-        .then(response => {
+        .then((response: any) => {
           console.log(response)
         })
         .catch(error => {
