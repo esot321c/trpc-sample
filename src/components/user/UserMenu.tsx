@@ -87,7 +87,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const verifyOwnership = (nonce: string, address: string) => {
     if (!session.data) {
       walletContext.wallet.signData(address, nonce)
-        .then(signature => {
+        .then((signature: { key: string; signature: string; }) => {
           console.log(signature)
           return signIn("credentials", {
             nonce,
