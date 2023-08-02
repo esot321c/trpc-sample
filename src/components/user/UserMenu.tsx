@@ -104,7 +104,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
         .then((response: any) => {
           console.log(response)
         })
-        .catch(error => {
+        .catch((error: any) => {
           console.error(error);
         });
     }
