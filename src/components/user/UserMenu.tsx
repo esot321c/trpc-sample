@@ -126,6 +126,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
       .then((response: any) => {
         if (response.status !== 200 || !response.status) {
           console.log('disconnect')
+          setRewardAddress(undefined)
           walletContext.disconnect()
         }
         console.log(response)
@@ -133,6 +134,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
       })
       .catch((error: any) => {
         console.log('disconnect')
+        setRewardAddress(undefined)
         walletContext.disconnect()
         console.error(error);
         setProviderLoading(false)
@@ -151,6 +153,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const clearWallet = async () => {
     localStorage.setItem(WALLET_ADDRESS, '');
     localStorage.setItem(WALLET_NAME, '');
+    setRewardAddress(undefined)
     walletContext.disconnect()
     signOut()
   };
@@ -176,7 +179,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
   return (
     <>
       {walletContext.connected &&
-        <Typography>
+        <Typography sx={{ display: 'block' }}>
           Connected
         </Typography>
       }
