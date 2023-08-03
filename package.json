@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "node scripts/fix-meshsdk-typings.js && node scripts/fix-meshsdk-core-typings.js"
+    "postinstall": "prisma generate && node scripts/fix-meshsdk-typings.js && node scripts/fix-meshsdk-core-typings.js"
   },
   "dependencies": {
     "@babel/core": "^7.22.9",
