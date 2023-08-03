@@ -27,7 +27,7 @@ export const trpc = createTRPCNext<AppRouter>({
            * If you want to use SSR, you need to use the server's full URL
            * @link https://trpc.io/docs/ssr
            **/
-          url: `${process.env.NEXTAUTH_URL}/api/trpc`,
+          url: `${process.env.VERCEL_URL}/api/trpc`,
           // You can pass any HTTP headers you wish here
           async headers() {
             return {
