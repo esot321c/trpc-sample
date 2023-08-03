@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { DarkTheme, LightTheme } from "@styles/theme";
-import { Theme, Fade, Divider } from '@mui/material';
+import { Theme, Fade, Divider, Avatar, Button } from '@mui/material';
 import Box from "@mui/material/Box";
 import Link from '@components/Link'
 import { ThemeContext } from "@contexts/ThemeContext";
@@ -17,6 +17,7 @@ import Logo from '@components/svgs/Logo';
 import NotificationsMenu from '@components/notifications/NotificationsMenu'
 import UserMenu from '@src/components/user/UserMenu';
 import SocialGrid from './SocialGrid';
+import { signIn, signOut, useSession } from "next-auth/react";
 
 const pages = [
   {
@@ -218,7 +219,7 @@ const Header: FC<IHeaderProps> = ({ }) => {
                 >
 
                   {/* <NotificationsMenu />*/}
-                  {/* <UserMenu /> */}
+                  <UserMenu />
                   <IconButton onClick={toggleTheme} sx={{ color: theme.palette.text.primary }}>
                     {(theme === DarkTheme) ? <Brightness7Icon /> : <Brightness4Icon />}
                   </IconButton>
