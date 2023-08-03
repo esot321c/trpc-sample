@@ -74,11 +74,11 @@ const UserMenu: FC<IUserMenuProps> = () => {
   }, [walletContext.connected]);
 
   useEffect(() => {
-    // console.log('connected: ' + walletContext.connected)
-    // console.log('rewardAddress: ' + rewardAddress)
+    console.log('connected: ' + walletContext.connected)
+    console.log('rewardAddress: ' + rewardAddress)
     if (rewardAddress && walletContext.connected && sessionStatus === 'unauthenticated') {
       result.refetch();
-      // console.log('result refetched')
+      console.log('result refetched')
     }
   }, [rewardAddress, sessionStatus]);
 
@@ -90,7 +90,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
 
   useEffect(() => {
     if (newNonce && rewardAddress) {
-      // console.log('verifying ownership with nonce: ' + newNonce)
+      console.log('verifying ownership with nonce: ' + newNonce)
       if (sessionStatus === 'unauthenticated') {
         verifyOwnership(newNonce, rewardAddress)
       }
@@ -99,9 +99,11 @@ const UserMenu: FC<IUserMenuProps> = () => {
 
   const verifyOwnership = (nonce: string, address: string) => {
     setProviderLoading(true)
+    console.log('nonce: ' + nonce)
+    console.log('address: ' + address)
     walletContext.wallet.signData(address, nonce)
       .then((signature: { key: string; signature: string; }) => {
-        // console.log(signature)
+        console.log(signature)
         return signIn("credentials", {
           nonce,
           rewardAddress: rewardAddress,
