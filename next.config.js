@@ -8,6 +8,7 @@ const nextConfig = {
     SUMSUB_SECRET_KEY: process.env.SUMSUB_SECRET_KEY,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_SECRET_ID: process.env.GITHUB_SECRET_ID,
+    VERCEL_URL: process.env.VERCEL_URL
   },
   swcMinify: true,
   webpack: function (config, options) {
