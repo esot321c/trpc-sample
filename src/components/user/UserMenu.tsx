@@ -77,7 +77,13 @@ const UserMenu: FC<IUserMenuProps> = () => {
     console.log('connected: ' + walletContext.connected)
     console.log('rewardAddress: ' + rewardAddress)
     if (rewardAddress && walletContext.connected && sessionStatus === 'unauthenticated') {
-      result.refetch();
+      result.refetch()
+        .then((response: any) => {
+          console.log(response)
+        })
+        .catch((error: any) => {
+          console.error(error);
+        });
       console.log('result refetched')
     }
   }, [rewardAddress, sessionStatus]);
