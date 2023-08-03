@@ -15,58 +15,38 @@ import {
   ListItemButton
 } from "@mui/material";
 import { useWalletList, useAddress, useWallet } from '@meshsdk/react';
+import { signIn, useSession } from "next-auth/react"; // Import signIn from next-auth
 
 const WALLET_ADDRESS = "wallet_address_coinecta";
 const WALLET_NAME = "wallet_name_coinecta";
 
-interface IAddWallet {
+interface ISignIn {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AddWallet: FC<IAddWallet> = ({ open, setOpen }) => {
+export const SignIn: FC<ISignIn> = ({ open, setOpen, setLoading }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const wallets = useWalletList();
   const walletContext = useWallet()
-  const connectedWalletAddress = useAddress();
-
-  useEffect(() => {
-    // load primary address
-    const storedWalletAddress = localStorage.getItem(WALLET_ADDRESS);
-    // load wallet state
-    const storedWalletName = localStorage.getItem(WALLET_NAME);
-    if (
-      storedWalletAddress !== null &&
-      storedWalletName !== null &&
-      storedWalletAddress !== "" &&
-      storedWalletName !== ""
-    ) {
-      walletContext.connect(storedWalletName)
-    }
-  }, [])
 
   const handleClose = () => {
     setOpen(false)
   }
 
   const handleConnect = (walletName: string) => {
+    setLoading(true)
     walletContext.connect(walletName)
-    if (connectedWalletAddress) {
-      localStorage.setItem(WALLET_ADDRESS, connectedWalletAddress);
-      localStorage.setItem(WALLET_NAME, walletContext.name);
-    }
+    handleClose()
   }
 
-  useEffect(() => {
-    if (walletContext.connecting === false) {
-      setOpen(false)
-    }
-    if (connectedWalletAddress) {
-      localStorage.setItem(WALLET_ADDRESS, connectedWalletAddress);
-      localStorage.setItem(WALLET_NAME, walletContext.name);
-    }
-  }, [walletContext.connecting, connectedWalletAddress])
+  const handleProviderSignIn = (providerId: string) => {
+    signIn(providerId); // Call the signIn function with the provider ID
+    setLoading(true)
+    handleClose()
+  };
 
   return (
     <>
@@ -89,6 +69,7 @@ export const AddWallet: FC<IAddWallet> = ({ open, setOpen }) => {
             <CircularProgress sx={{ ml: 2, color: "black" }} size={"1.2rem"} />
           ) : (
             <List>
+              {/* Wallets */}
               {wallets.map((wallet, i) => {
                 return (
                   <ListItemButton key={i} onClick={() => handleConnect(wallet.name)}>
@@ -99,6 +80,13 @@ export const AddWallet: FC<IAddWallet> = ({ open, setOpen }) => {
                   </ListItemButton>
                 )
               })}
+              {/* GitHub Provider */}
+              <ListItemButton onClick={() => handleProviderSignIn("github")}>
+                <ListItemAvatar>
+                  <Avatar alt="GitHub Icon" src="/path/to/github-icon.png" sx={{ height: "24px", width: "24px" }} variant="square" />
+                </ListItemAvatar>
+                <ListItemText primary="GitHub" />
+              </ListItemButton>
             </List>
           )}
         </DialogContent>
@@ -117,4 +105,4 @@ export const AddWallet: FC<IAddWallet> = ({ open, setOpen }) => {
   );
 };
 
-export default AddWallet;
+export default SignIn;

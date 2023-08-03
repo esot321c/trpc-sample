@@ -17,14 +17,14 @@ export const userRouter = createTRPCRouter({
 
       // Check if a user with the given address already exists
       let user = await prisma.user.findUnique({
-        where: { defaultAddress: userAddress },
+        where: { rewardAddress: userAddress },
       });
 
       // If the user doesn't exist, create a new user model in the database
       if (!user) {
         user = await prisma.user.create({
           data: {
-            defaultAddress: userAddress,
+            rewardAddress: userAddress,
             // Include any other fields you want to set here
           },
         });

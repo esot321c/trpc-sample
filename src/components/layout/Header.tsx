@@ -50,7 +50,6 @@ interface IHeaderProps {
 }
 
 const Header: FC<IHeaderProps> = ({ }) => {
-  const { data: sessionData } = useSession();
   const { theme, setTheme } = useContext(ThemeContext);
   const [navbarOpen, setNavbarOpen] = React.useState(false);
 
@@ -221,23 +220,6 @@ const Header: FC<IHeaderProps> = ({ }) => {
 
                   {/* <NotificationsMenu />*/}
                   <UserMenu />
-                  {sessionData?.user ? (
-                    <Button onClick={() => void signOut()}>
-                      <Avatar
-                        src={sessionData?.user?.image ?? ""}
-                        alt={sessionData?.user?.name ?? ""}
-                        sx={{ display: 'inline-block', verticalAlign: 'middle' }}
-                      />
-                    </Button>
-                  ) : (
-                    <Button
-                      className="btn-ghost rounded-btn btn"
-                      onClick={() => void signIn()}
-                      variant="contained"
-                    >
-                      Sign in
-                    </Button>
-                  )}
                   <IconButton onClick={toggleTheme} sx={{ color: theme.palette.text.primary }}>
                     {(theme === DarkTheme) ? <Brightness7Icon /> : <Brightness4Icon />}
                   </IconButton>

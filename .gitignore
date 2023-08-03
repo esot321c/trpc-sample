@@ -40,3 +40,7 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+localhost.crt
+localhost.key
+server.js

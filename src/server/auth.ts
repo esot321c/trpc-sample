@@ -28,7 +28,9 @@ declare module "next-auth" {
   interface User {
     id: string;
     name?: string;
+    rewardAddress?: string;
     defaultAddress?: string;
+    defaultWalletType?: string;
     nonce?: string;
     email?: string;
     emailVerified?: Date;

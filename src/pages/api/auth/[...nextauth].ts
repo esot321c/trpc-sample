@@ -31,12 +31,6 @@ type Credentials = {
   wallet: string;
 }
 
-type Wallet = {
-  type: string;
-  address: string;
-  rewardAddress: string;
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -44,40 +38,10 @@ export default async function handler(
   return await NextAuth(req, res, authOptions(req, res))
 }
 
-const createUserProfile = async (userId: string) => {
-  // Check if a UserProfile with the given auth_user_id already exists
-  const existingUserProfile = await prisma.userProfile.findUnique({
-    where: { userId: userId },
-  });
-
-  let userProfile;
-
-  if (existingUserProfile) {
-    // Update the existing UserProfile
-    userProfile = await prisma.userProfile.update({
-      where: { userId: userId },
-      data: {
-        // Include the fields you want to update here
-      },
-    });
-  } else {
-    // Create a new UserProfile
-    userProfile = await prisma.userProfile.create({
-      data: {
-        userId: userId,
-        // Include the fields you want to set here
-      },
-    });
-  }
-
-  return true; // Return true to continue the sign-in process
-}
-
 export const authOptions = (
   req: NextApiRequest,
   res: NextApiResponse
 ): NextAuthOptions => {
-
 
   function resMessage(status: number, message: string) {
     return res.status(status).json({
@@ -91,8 +55,7 @@ export const authOptions = (
 
   async function signUser(user: User, credentials: Credentials) {
     const signatureParse = JSON.parse(credentials.signature)
-    let userToUpdate
-    userToUpdate = await prisma.user.update({
+    await prisma.user.update({
       where: { id: user.id },
       data: {
         nonce: credentials.nonce
@@ -119,13 +82,14 @@ export const authOptions = (
     const { nonce, rewardAddress, signature, wallet } = credentials
     const walletParse = JSON.parse(wallet)
     const signatureParse = JSON.parse(signature)
-    const avatar = `https://ui-avatars.com/api/?background=random&name=${walletParse.address}&length=1`
     const user = await prisma.user.create({
       data: {
         name: walletParse.address,
-        image: avatar,
-        defaultAddress: rewardAddress,
-        nonce: nonce,
+        image: walletParse.icon,
+        rewardAddress,
+        defaultAddress: walletParse.address,
+        defaultWalletType: walletParse.type,
+        nonce,
         wallets: {
           create: [
             {
@@ -212,7 +176,7 @@ export const authOptions = (
             // Search for user credentials in the database
             const user = await prisma.user.findFirst({
               where: {
-                defaultAddress: rewardAddress,
+                rewardAddress: rewardAddress,
               },
             }) as User;
 
