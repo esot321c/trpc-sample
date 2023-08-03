@@ -4,7 +4,8 @@ import {
   Icon,
   useTheme,
   Avatar,
-  Typography
+  Typography,
+  Button
 } from '@mui/material'
 import { WalletContext } from '@contexts/WalletContext';
 import { useRouter } from 'next/router';
@@ -18,10 +19,13 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import SellIcon from '@mui/icons-material/Sell';
 import EditIcon from '@mui/icons-material/Edit';
-import AddWallet from '@src/components/user/AddWallet';
-import { useWallet, useWalletList, useAddress } from '@meshsdk/react';
+import SignIn from '@src/components/user/SignIn';
+import { useWallet, useAddress, useWalletList } from '@meshsdk/react';
 import { getShortAddress } from '@utils/general';
 import { SxProps } from '@mui/system';
+import { useSession } from 'next-auth/react';
+import { trpc } from "@utils/trpc";
+import { signIn, signOut } from "next-auth/react"
 
 const WALLET_ADDRESS = "wallet_address_coinecta";
 const WALLET_NAME = "wallet_name_coinecta";
@@ -40,14 +44,92 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false)
   const walletContext = useWallet()
+  const connectedWalletAddress = useAddress();
+  const [rewardAddress, setRewardAddress] = useState<string | undefined>(undefined);
+  const result = trpc.user.getNonce.useQuery({ userAddress: rewardAddress }, { enabled: false, retry: false });
+  const [newNonce, setNewNonce] = useState<string | undefined>(undefined)
+  const [walletIcon, setWalletIcon] = useState<string | undefined>(undefined)
   const walletList = useWalletList();
-  const connectedWalletAddress = useAddress(0);
+  const { data: sessionData, status: sessionStatus } = useSession();
+  const [providerLoading, setProviderLoading] = useState(true)
 
-  const filterByName = (arr: IWalletType[], name: string) => {
-    return arr.filter(item => item.name === name);
+  useEffect(() => {
+    if (sessionStatus === 'authenticated' || sessionStatus === 'unauthenticated') {
+      setProviderLoading(false)
+    }
+  }, [sessionStatus, setProviderLoading])
+
+  useEffect(() => {
+    if (walletContext.connected) {
+      async function getUserAddress() {
+        const address = await walletContext.wallet.getRewardAddresses();
+        const walletTypeObject: IWalletType[] = walletList.filter(item => item.name === walletContext.name);
+        setWalletIcon(walletTypeObject[0].icon)
+        // console.log('connected Wallet Address: ' + connectedWalletAddress)
+        // console.log('got user address: ' + address[0])
+        setRewardAddress(address[0]);
+      }
+      getUserAddress();
+    }
+  }, [walletContext.connected]);
+
+  useEffect(() => {
+    // console.log('connected: ' + walletContext.connected)
+    // console.log('rewardAddress: ' + rewardAddress)
+    if (rewardAddress && walletContext.connected && sessionStatus === 'unauthenticated') {
+      result.refetch();
+      // console.log('result refetched')
+    }
+  }, [rewardAddress, sessionStatus]);
+
+  useEffect(() => {
+    if (result?.data?.nonce !== null && result?.data?.nonce !== undefined && sessionStatus === 'unauthenticated') {
+      setNewNonce(result.data.nonce)
+    }
+  }, [result.data, sessionStatus])
+
+  useEffect(() => {
+    if (newNonce && rewardAddress) {
+      // console.log('verifying ownership with nonce: ' + newNonce)
+      if (sessionStatus === 'unauthenticated') {
+        verifyOwnership(newNonce, rewardAddress)
+      }
+    }
+  }, [newNonce, sessionStatus])
+
+  const verifyOwnership = (nonce: string, address: string) => {
+    setProviderLoading(true)
+    walletContext.wallet.signData(address, nonce)
+      .then((signature: { key: string; signature: string; }) => {
+        // console.log(signature)
+        return signIn("credentials", {
+          nonce,
+          rewardAddress: rewardAddress,
+          signature: JSON.stringify(signature),
+          wallet: JSON.stringify({
+            type: walletContext.name,
+            rewardAddress,
+            address: connectedWalletAddress,
+            icon: walletIcon
+          }),
+          redirect: false
+        });
+      })
+      .then((response: any) => {
+        if (response.status !== 200 || !response.status) {
+          console.log('disconnect')
+          walletContext.disconnect()
+        }
+        console.log(response)
+        setProviderLoading(false)
+      })
+      .catch((error: any) => {
+        console.log('disconnect')
+        walletContext.disconnect()
+        console.error(error);
+        setProviderLoading(false)
+      });
   }
-
-  const walletTypeObject = filterByName(walletList, walletContext.name);
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -62,11 +144,45 @@ const UserMenu: FC<IUserMenuProps> = () => {
     localStorage.setItem(WALLET_ADDRESS, '');
     localStorage.setItem(WALLET_NAME, '');
     walletContext.disconnect()
+    signOut()
   };
+
+  // {sessionData?.user ? (
+  //   <Button onClick={() => void signOut()}>
+  //     <Avatar
+  //       src={sessionData?.user?.image ?? ""}
+  //       alt={sessionData?.user?.name ?? ""}
+  //       sx={{ display: 'inline-block', verticalAlign: 'middle' }}
+  //     />
+  //   </Button>
+  // ) : (
+  //   <Button
+  //     className="btn-ghost rounded-btn btn"
+  //     onClick={() => void signIn()}
+  //     variant="contained"
+  //   >
+  //     Sign in
+  //   </Button>
+  // )}
 
   return (
     <>
-      {walletContext.connected ? (
+      {walletContext.connected &&
+        <Typography>
+          Connected
+        </Typography>
+      }
+      {(sessionStatus === 'unauthenticated' || sessionStatus === 'loading') && (
+        <Button
+          className="btn-ghost rounded-btn btn"
+          onClick={() => setModalOpen(true)}
+          variant="contained"
+          disabled={providerLoading}
+        >
+          {providerLoading ? 'Loading...' : 'Sign in'}
+        </Button>
+      )}
+      {sessionStatus === 'authenticated' && (
         <>
           <IconButton
             sx={{
@@ -77,7 +193,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
             }}
             onClick={handleClick}
           >
-            <Avatar src={walletTypeObject[0].icon} sx={{ width: '24px', height: '24px', mr: 1 }} variant="square" />
+            <Avatar src={sessionData.user.image} sx={{ width: '24px', height: '24px', mr: 1 }} variant="square" />
             {connectedWalletAddress &&
               <Typography>
                 {getShortAddress(connectedWalletAddress)}
@@ -90,32 +206,34 @@ const UserMenu: FC<IUserMenuProps> = () => {
             open={open}
             onClose={handleClose}
             onClick={handleClose}
-            PaperProps={{
-              elevation: 1,
-              sx: {
-                overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                minWidth: '230px',
-                mt: 0,
-                '& .MuiAvatar-root': {
-                  width: 32,
-                  height: 32,
-                  ml: -0.5,
-                  mr: 1,
+            slotProps={{
+              paper: {
+                elevation: 1,
+                sx: {
+                  overflow: 'visible',
+                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                  minWidth: '230px',
+                  mt: 0,
+                  '& .MuiAvatar-root': {
+                    width: 32,
+                    height: 32,
+                    ml: -0.5,
+                    mr: 1,
+                  },
+                  '&:before': {
+                    content: '""',
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                    right: 15,
+                    width: 10,
+                    height: 10,
+                    bgcolor: 'background.paper',
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: 0,
+                  },
                 },
-                '&:before': {
-                  content: '""',
-                  display: 'block',
-                  position: 'absolute',
-                  top: 0,
-                  right: 15,
-                  width: 10,
-                  height: 10,
-                  bgcolor: 'background.paper',
-                  transform: 'translateY(-50%) rotate(45deg)',
-                  zIndex: 0,
-                },
-              },
+              }
             }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
@@ -147,22 +265,8 @@ const UserMenu: FC<IUserMenuProps> = () => {
             </MenuItem>
           </Menu>
         </>
-      ) : (
-        <IconButton sx={{
-          color: theme.palette.text.primary,
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: '4px',
-          mr: 2
-        }} onClick={() => setModalOpen(true)}>
-          <Icon color="inherit" sx={{ mr: 1 }}>
-            account_balance_wallet
-          </Icon>
-          <Typography>
-            Connect wallet
-          </Typography>
-        </IconButton>
       )}
-      <AddWallet open={modalOpen} setOpen={setModalOpen} />
+      <SignIn open={modalOpen} setOpen={setModalOpen} setLoading={setProviderLoading} />
     </>
   );
 }
