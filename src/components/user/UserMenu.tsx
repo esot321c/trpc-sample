@@ -52,12 +52,24 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const walletList = useWalletList();
   const { data: sessionData, status: sessionStatus } = useSession();
   const [providerLoading, setProviderLoading] = useState(true)
+  const walletTypeQuery = trpc.user.getUserWalletType.useQuery({}, {
+    enabled: sessionStatus === 'authenticated', // Only run the query if this is true
+  });
 
   useEffect(() => {
     if (sessionStatus === 'authenticated' || sessionStatus === 'unauthenticated') {
       setProviderLoading(false)
     }
   }, [sessionStatus, setProviderLoading])
+
+  useEffect(() => {
+    console.log('wallet type query: ' + walletTypeQuery.data)
+    console.log('session status: ' + sessionStatus)
+    if (walletTypeQuery.data && !walletContext.connected) {
+      // Connect to the user's Cardano wallet using the wallet type
+      walletContext.connect(walletTypeQuery.data)
+    }
+  }, [walletTypeQuery.data]); // Depend on the query's data
 
   useEffect(() => {
     if (walletContext.connected) {
@@ -157,24 +169,6 @@ const UserMenu: FC<IUserMenuProps> = () => {
     walletContext.disconnect()
     signOut()
   };
-
-  // {sessionData?.user ? (
-  //   <Button onClick={() => void signOut()}>
-  //     <Avatar
-  //       src={sessionData?.user?.image ?? ""}
-  //       alt={sessionData?.user?.name ?? ""}
-  //       sx={{ display: 'inline-block', verticalAlign: 'middle' }}
-  //     />
-  //   </Button>
-  // ) : (
-  //   <Button
-  //     className="btn-ghost rounded-btn btn"
-  //     onClick={() => void signIn()}
-  //     variant="contained"
-  //   >
-  //     Sign in
-  //   </Button>
-  // )}
 
   return (
     <>

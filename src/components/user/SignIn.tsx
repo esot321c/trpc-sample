@@ -14,11 +14,8 @@ import {
   ListItemText,
   ListItemButton
 } from "@mui/material";
-import { useWalletList, useAddress, useWallet } from '@meshsdk/react';
-import { signIn, useSession } from "next-auth/react"; // Import signIn from next-auth
-
-const WALLET_ADDRESS = "wallet_address_coinecta";
-const WALLET_NAME = "wallet_name_coinecta";
+import { useWalletList, useWallet } from '@meshsdk/react';
+import { signIn } from "next-auth/react"; // Import signIn from next-auth
 
 interface ISignIn {
   open: boolean;

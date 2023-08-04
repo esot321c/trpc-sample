@@ -4,9 +4,9 @@ generator client {
 
 datasource db {
   provider          = "postgresql"
-  url               = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl         = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING") // used for migrations
+  url               = env("POSTGRES_PRISMA_URL")
+  directUrl         = env("POSTGRES_URL_NON_POOLING")
+  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Account {
@@ -22,8 +22,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -49,12 +48,9 @@ model User {
   email             String?   @unique
   emailVerified     DateTime? @map("email_verified")
   image             String?
-  wallets           Wallet[]
   accounts          Account[]
   sessions          Session[]
-
-  // user_profile_id String      @unique
-  // user_profile    UserProfile @relation(fields: [user_profile_id], references: [id])
+  wallets           Wallet[]
 
   @@map("users")
 }
@@ -86,8 +82,8 @@ model UserProfile {
   marital_status String?
   nationality    String?
   occupation     String?
-  addresses      Address[]
   image          String?
+  addresses      Address[]
   transactions   Transaction[]
 
   @@map("user_profiles")
@@ -116,9 +112,8 @@ model Wallet {
   rewardAddress String @unique
   changeAddress String @unique
   user_id       String
-  user          User?  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user          User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([type, rewardAddress, changeAddress])
   @@map("wallets")
 }
 
@@ -129,8 +124,8 @@ model Transaction {
   currency    String
   completed   Boolean      @default(false)
   created_at  DateTime     @default(now())
-  user        UserProfile? @relation(fields: [user_id], references: [id])
   user_id     String?
+  user        UserProfile? @relation(fields: [user_id], references: [id])
 
   @@map("transactions")
 }

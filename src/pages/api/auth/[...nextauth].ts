@@ -1,8 +1,3 @@
-// import { authOptions } from "@server/auth";
-// import NextAuth from "next-auth";
-
-// export default NextAuth(authOptions);
-
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from '@server/prisma';
 import {
@@ -55,12 +50,7 @@ export const authOptions = (
 
   async function signUser(user: User, credentials: Credentials) {
     const signatureParse = JSON.parse(credentials.signature)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        nonce: credentials.nonce
-      },
-    });
+    const walletParse = JSON.parse(credentials.wallet)
     const result = checkSignature(credentials.nonce, credentials.rewardAddress, signatureParse);
     if (result) {
       // set a new nonce for the user to make sure an attacker can't reuse this one
@@ -82,7 +72,10 @@ export const authOptions = (
     const { nonce, rewardAddress, signature, wallet } = credentials
     const walletParse = JSON.parse(wallet)
     const signatureParse = JSON.parse(signature)
-    const user = await prisma.user.create({
+    const user = await prisma.user.update({
+      where: {
+        rewardAddress: rewardAddress
+      },
       data: {
         name: walletParse.address,
         image: walletParse.icon,
@@ -173,17 +166,23 @@ export const authOptions = (
               return resMessage(400, 'Invalid login')
             }
 
-            // Search for user credentials in the database
+            // NOTE THAT WE CREATED A USER WHEN GENERATING A NONCE
+            // Even if this is a new user, we will already have a database entry
+            // But in that case, defaultAddress will be null so we just have to
+            // check for that scenario. 
             const user = await prisma.user.findFirst({
               where: {
                 rewardAddress: rewardAddress,
+                NOT: {
+                  defaultAddress: null,
+                },
               },
             }) as User;
 
-            // User Exists
+            // User already exists
             if (user) return signUser(user, credentials as Credentials)
 
-            // User not exist
+            // User is new
             return createNewUser(credentials as Credentials)
           } catch (error) {
             console.error(error)

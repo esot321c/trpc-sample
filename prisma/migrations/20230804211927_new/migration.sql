@@ -143,9 +143,6 @@ CREATE UNIQUE INDEX "wallets_rewardAddress_key" ON "wallets"("rewardAddress");
 -- CreateIndex
 CREATE UNIQUE INDEX "wallets_changeAddress_key" ON "wallets"("changeAddress");
 
--- CreateIndex
-CREATE UNIQUE INDEX "wallets_type_rewardAddress_changeAddress_key" ON "wallets"("type", "rewardAddress", "changeAddress");
-
 -- AddForeignKey
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 

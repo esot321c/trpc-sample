@@ -1,8 +1,3 @@
-import {
-  getServerSession,
-  type NextAuthOptions
-} from "next-auth";
-
 import { ProviderType } from "next-auth/providers/index";
 
 const SUPPORTED_WALLETS = [
