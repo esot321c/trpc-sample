@@ -49,8 +49,6 @@ export const userRouter = createTRPCRouter({
         throw new Error('User ID not found in session'); // Handle the case where userId is not defined
       }
 
-      console.log('query userId: ' + userId)
-
       // Query the database using Prisma to get the user's default wallet type by their ID
       const user = await prisma.user.findUnique({
         where: { id: userId },

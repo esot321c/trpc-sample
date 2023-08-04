@@ -23,6 +23,8 @@ interface ISignIn {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const VESPR_ICON = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbDpzcGFjZT0icHJlc2VydmUiIHZpZXdCb3g9IjAgMCA2NDAgNjQwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJyZ2JhKDksIDE0LCAyMiwgMSkiIHJ4PSIxMDAiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJtNDU1LjUxOCAxNzguMDQwOC0xMzUuMjQzNiAxODIuNzV2LS43Mzk2TDE4NC45NjIgMTc3LjE4MDhINzAuOTI2bDM1LjE3NCA0Ny41NThoMzMuOTE4NEwzMjAuMjA1NiA0NjIuMTE2di45NjMybDE4MC4yNTYtMjM3LjQ5NzZINTM0LjM4bDM1LjE3NC00Ny41NDA4SDQ1NS41MTh6Ii8'
+
 export const SignIn: FC<ISignIn> = ({ open, setOpen, setLoading }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -77,12 +79,22 @@ export const SignIn: FC<ISignIn> = ({ open, setOpen, setLoading }) => {
             <List>
               {/* Wallets */}
               {wallets.map((wallet, i) => {
+                if (wallet.icon === VESPR_ICON && i > 0) return null
                 return (
                   <ListItemButton key={i} onClick={() => handleConnect(wallet.name)}>
                     <ListItemAvatar>
-                      <Avatar alt={wallet.name + ' Icon'} src={wallet.icon} sx={{ height: '24px', width: '24px' }} variant="square" />
+                      <Avatar
+                        alt={
+                          wallet.icon === VESPR_ICON ? 'Vespr Icon' : wallet.name + ' Icon'
+                        }
+                        src={wallet.icon}
+                        sx={{ height: '24px', width: '24px' }}
+                        variant="square"
+                      />
                     </ListItemAvatar>
-                    <ListItemText primary={wallet.name} />
+                    <ListItemText primary={
+                      wallet.icon === VESPR_ICON ? 'Vespr' : wallet.name
+                    } />
                   </ListItemButton>
                 )
               })}
