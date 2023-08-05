@@ -16,7 +16,7 @@ import {
   JWTDecodeParams,
   JWTEncodeParams,
   decode,
-  encode,
+  encode
 } from 'next-auth/jwt';
 
 type Credentials = {
@@ -48,7 +48,7 @@ export const authOptions = (
     return req.query.nextauth?.includes(include)
   }
 
-  async function signUser(user: User, credentials: Credentials) {
+  async function signUser(user: User, credentials: Credentials): Promise<User | null> {
     const signatureParse = JSON.parse(credentials.signature)
     const walletParse = JSON.parse(credentials.wallet)
     const result = checkSignature(credentials.nonce, credentials.rewardAddress, signatureParse);
@@ -63,15 +63,13 @@ export const authOptions = (
           nonce: newNonce
         }
       })
-      return {
-        ...user,
-        walletType: walletParse.type
-      }
+      const newUser = { ...user, walletType: walletParse.type }
+      return newUser
     }
-    return resMessage(500, 'signUser error')
+    return null
   }
 
-  async function createNewUser(credentials: Credentials) {
+  async function createNewUser(credentials: Credentials): Promise<User | null> {
     const { nonce, rewardAddress, signature, wallet } = credentials
     const walletParse = JSON.parse(wallet)
     const signatureParse = JSON.parse(signature)
@@ -81,7 +79,6 @@ export const authOptions = (
       },
       data: {
         name: walletParse.address,
-        image: walletParse.icon,
         rewardAddress,
         defaultAddress: walletParse.address,
         nonce,
@@ -95,7 +92,7 @@ export const authOptions = (
         }
       },
     })
-    if (!user) return resMessage(500, 'Unable to create new user')
+    if (!user) null
 
     const account = await prisma.account.create({
       data: {
@@ -117,12 +114,10 @@ export const authOptions = (
           nonce: newNonce
         }
       })
-      return {
-        ...user,
-        walletType: walletParse.type
-      }
+      const newUser: User = { ...user, walletType: walletParse.type }
+      return newUser
     }
-    return resMessage(500, 'Unable to link account to created user')
+    return null
   }
 
   return {
@@ -156,18 +151,18 @@ export const authOptions = (
             placeholder: "",
           }
         },
-        async authorize(credentials, req): Promise<any> {
+        async authorize(credentials, req): Promise<User | null> {
           try {
             if (req.method !== 'POST') {
               res.setHeader('Allow', ['POST'])
-              return resMessage(405, `Method ${req.method} Not Allowed`)
+              return null
             }
 
             const { nonce, rewardAddress, signature, wallet } =
               credentials as Credentials
 
             if (!nonce || !rewardAddress || !signature) {
-              return resMessage(400, 'Invalid login')
+              return null
             }
 
             // NOTE THAT WE CREATED A USER WHEN GENERATING A NONCE
@@ -190,7 +185,7 @@ export const authOptions = (
             return createNewUser(credentials as Credentials)
           } catch (error) {
             console.error(error)
-            return resMessage(400, 'Unknown error, check console log')
+            return null
           }
         },
       }),
@@ -256,12 +251,14 @@ export const authOptions = (
         // Since a user is already exist in the database we can update user information.
         await prisma.user.update({
           where: { id: profileExists.id },
-          data: { name: user.name, image: user.image },
+          data: { name: user.name },
         })
         return user
       },
       async jwt({ token, user }: any) {
-        if (user) token.user = user
+        if (user) {
+          token.user = user;
+        }
         return token
       },
       async session({
@@ -272,15 +269,23 @@ export const authOptions = (
         token: JWT;
         user: any;
       }) {
-        const dbSession = await prisma.session.findFirst({
-          where: { userId: user.id },
-        });
+        const cookie = getCookie(`next-auth.session-token`, {
+          req: req,
+        })
+        let dbSession
+        if (typeof cookie === 'string') {
+          dbSession = await prisma.session.findFirst({
+            where: {
+              sessionToken: cookie
+            },
+          })
+        }
         if (user) {
           session.user = {
             id: user.id,
             name: user.name,
             address: user.defaultAddress,
-            walletType: dbSession?.walletType,
+            walletType: dbSession?.walletType!,
             image: user.image,
           }
         }
@@ -301,7 +306,10 @@ export const authOptions = (
           const cookie = getCookie(`next-auth.session-token`, {
             req: req,
           })
-          if (cookie) return cookie
+          if (cookie) {
+            console.log(cookie)
+            return cookie
+          }
           else return ''
         }
 

@@ -23,16 +23,20 @@ declare module "next-auth" {
   }
   interface User {
     id: string;
-    name?: string;
-    rewardAddress?: string;
-    defaultAddress?: string;
-    nonce?: string;
-    email?: string;
-    emailVerified?: Date;
-    image?: string;
-    wallets: Wallet[];
-    accounts: Account[];
-    sessions: Session[];
+    name: string | null;
+    rewardAddress: string | null;
+    defaultAddress: string | null;
+    nonce: string | null;
+    email: string | null;
+    emailVerified: Date | null;
+    image: string | null;
+    walletType: string;
+  }
+  interface Session {
+    walletType?: string;
+  }
+  interface JWT {
+    walletType?: string;
   }
   interface Account {
     id: string;
