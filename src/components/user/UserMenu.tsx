@@ -52,24 +52,27 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const walletList = useWalletList();
   const { data: sessionData, status: sessionStatus } = useSession();
   const [providerLoading, setProviderLoading] = useState(true)
-  const walletTypeQuery = trpc.user.getUserWalletType.useQuery({}, {
-    enabled: sessionStatus === 'authenticated', // Only run the query if this is true
-  });
+  // const walletTypeQuery = trpc.user.getUserWalletType.useQuery({}, {
+  //   enabled: sessionStatus === 'authenticated', // Only run the query if this is true
+  // });
 
   useEffect(() => {
     if (sessionStatus === 'authenticated' || sessionStatus === 'unauthenticated') {
       setProviderLoading(false)
     }
+    if (sessionStatus === 'authenticated' && sessionData.user.walletType) {
+      walletContext.connect(sessionData.user.walletType)
+    }
   }, [sessionStatus, setProviderLoading])
 
-  useEffect(() => {
-    console.log('wallet type query: ' + walletTypeQuery.data)
-    console.log('session status: ' + sessionStatus)
-    if (walletTypeQuery.data && !walletContext.connected) {
-      // Connect to the user's Cardano wallet using the wallet type
-      walletContext.connect(walletTypeQuery.data)
-    }
-  }, [walletTypeQuery.data]); // Depend on the query's data
+  // useEffect(() => {
+  //   console.log('wallet type query: ' + walletTypeQuery.data)
+  //   console.log('session status: ' + sessionStatus)
+  //   if (walletTypeQuery.data && !walletContext.connected) {
+  //     // Connect to the user's Cardano wallet using the wallet type
+  //     walletContext.connect(walletTypeQuery.data)
+  //   }
+  // }, [walletTypeQuery.data]); // Depend on the query's data
 
   useEffect(() => {
     if (walletContext.connected) {
@@ -172,11 +175,6 @@ const UserMenu: FC<IUserMenuProps> = () => {
 
   return (
     <>
-      {walletContext.connected &&
-        <Typography sx={{ display: 'block' }}>
-          Connected
-        </Typography>
-      }
       {(sessionStatus === 'unauthenticated' || sessionStatus === 'loading') && (
         <Button
           className="btn-ghost rounded-btn btn"

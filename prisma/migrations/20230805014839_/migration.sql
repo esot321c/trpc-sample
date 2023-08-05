@@ -32,7 +32,6 @@ CREATE TABLE "users" (
     "name" TEXT,
     "reward_address" TEXT,
     "default_address" TEXT,
-    "default_wallet_type" TEXT,
     "nonce" TEXT,
     "email" TEXT,
     "email_verified" TIMESTAMP(3),
@@ -92,7 +91,6 @@ CREATE TABLE "addresses" (
 -- CreateTable
 CREATE TABLE "wallets" (
     "id" SERIAL NOT NULL,
-    "type" TEXT NOT NULL,
     "rewardAddress" TEXT NOT NULL,
     "changeAddress" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
@@ -106,9 +104,10 @@ CREATE TABLE "transactions" (
     "description" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
     "currency" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
     "completed" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "user_id" TEXT,
+    "user_id" TEXT NOT NULL,
 
     CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );
@@ -156,4 +155,4 @@ ALTER TABLE "addresses" ADD CONSTRAINT "addresses_user_id_fkey" FOREIGN KEY ("us
 ALTER TABLE "wallets" ADD CONSTRAINT "wallets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

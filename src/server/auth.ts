@@ -18,6 +18,7 @@ declare module "next-auth" {
       name?: string;
       address?: string;
       image?: string;
+      walletType?: string;
     };
   }
   interface User {
@@ -25,7 +26,6 @@ declare module "next-auth" {
     name?: string;
     rewardAddress?: string;
     defaultAddress?: string;
-    defaultWalletType?: string;
     nonce?: string;
     email?: string;
     emailVerified?: Date;
@@ -47,7 +47,7 @@ declare module "next-auth" {
     scope?: string | null;
     id_token?: string | null;
     session_state?: string | null;
-    user: User; // Assuming you have a User interface defined
+    user: User;
   }
   interface UserProfile {
     id: string;
@@ -87,8 +87,8 @@ declare module "next-auth" {
   }
   interface Wallet {
     id: number;
-    type: typeof SUPPORTED_WALLETS[number];
-    address: string;
+    rewardAddress: string;
+    changeAddress: string;
     user_id: string;
     user?: UserProfile;
   }
@@ -97,6 +97,7 @@ declare module "next-auth" {
     description: string;
     amount: string;
     currency: string;
+    address: string;
     completed: boolean;
     created_at: string;
     user?: UserProfile;

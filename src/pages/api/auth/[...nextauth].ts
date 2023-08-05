@@ -63,7 +63,10 @@ export const authOptions = (
           nonce: newNonce
         }
       })
-      return user
+      return {
+        ...user,
+        walletType: walletParse.type
+      }
     }
     return resMessage(500, 'signUser error')
   }
@@ -81,12 +84,10 @@ export const authOptions = (
         image: walletParse.icon,
         rewardAddress,
         defaultAddress: walletParse.address,
-        defaultWalletType: walletParse.type,
         nonce,
         wallets: {
           create: [
             {
-              type: walletParse.type,
               rewardAddress: walletParse.rewardAddress,
               changeAddress: walletParse.address
             }
@@ -116,7 +117,10 @@ export const authOptions = (
           nonce: newNonce
         }
       })
-      return user
+      return {
+        ...user,
+        walletType: walletParse.type
+      }
     }
     return resMessage(500, 'Unable to link account to created user')
   }
@@ -261,7 +265,7 @@ export const authOptions = (
       },
       async session({
         session,
-        user,
+        user
       }: {
         session: Session;
         token: JWT;
@@ -272,6 +276,7 @@ export const authOptions = (
             id: user.id,
             name: user.name,
             address: user.defaultAddress,
+            walletType: user.walletType,
             image: user.image,
           }
         }
