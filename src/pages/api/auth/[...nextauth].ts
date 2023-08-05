@@ -209,6 +209,7 @@ export const authOptions = (
               sessionToken: sessionToken,
               userId: user.id,
               expires: sessionExpiry,
+              walletType: user.walletType
             },
           })
 
@@ -271,12 +272,15 @@ export const authOptions = (
         token: JWT;
         user: any;
       }) {
+        const dbSession = await prisma.session.findFirst({
+          where: { userId: user.id },
+        });
         if (user) {
           session.user = {
             id: user.id,
             name: user.name,
             address: user.defaultAddress,
-            walletType: user.walletType,
+            walletType: dbSession?.walletType,
             image: user.image,
           }
         }

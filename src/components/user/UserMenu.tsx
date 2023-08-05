@@ -60,8 +60,10 @@ const UserMenu: FC<IUserMenuProps> = () => {
     if (sessionStatus === 'authenticated' || sessionStatus === 'unauthenticated') {
       setProviderLoading(false)
     }
+    console.log('walllet type: ' + sessionData?.user.walletType)
     if (sessionStatus === 'authenticated' && sessionData.user.walletType) {
       walletContext.connect(sessionData.user.walletType)
+
     }
   }, [sessionStatus, setProviderLoading])
 
@@ -187,6 +189,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
       )}
       {sessionStatus === 'authenticated' && (
         <>
+          {sessionData.user.walletType}
           <IconButton
             sx={{
               color: theme.palette.text.primary,
