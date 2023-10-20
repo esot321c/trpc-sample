@@ -1,0 +1,63 @@
+import { prisma } from '@server/prisma';
+import { fetchAndUpdateStakepoolData } from '@server/utils/fetchAndUpdateStakepoolData';
+import crypto from 'crypto';
+import { z } from 'zod';
+import { createTRPCRouter, publicProcedure } from "../trpc";
+
+export const stakepoolRouter = createTRPCRouter({
+  stakepoolInfo: publicProcedure
+    .input(z.object({
+      stakepoolIds: z.array(z.string())
+    }))
+    .mutation(async ({ input }) => {
+      const stakepoolIds = input.stakepoolIds.sort(); // sort to maintain consistent order
+      const spoListKey = crypto.createHash('sha256').update(stakepoolIds.join('|')).digest('hex'); // create a unique hash for the list of stakepools
+      const cacheExpiryMinutes = 10;
+      const staleTime = new Date(Date.now() - cacheExpiryMinutes * 60 * 1000);
+
+      // Check if we have non-stale cache for this spoListKey
+      const cachedData = await prisma.stakepoolDataCache.findUnique({
+        where: { spoListKey },
+      });
+
+      if (cachedData) {
+        if (cachedData.updatedAt > staleTime) {
+          // If valid cache exists and it's not stale, return the cached data
+          return cachedData.data;
+        } else {
+          // Cache is stale. Mark it as "being updated" by setting the updatedAt timestamp.
+          await prisma.stakepoolDataCache.update({
+            where: { spoListKey },
+            data: { updatedAt: new Date() }, // This timestamp update should be immediate
+          });
+
+          // Initiate an update but don't await it
+          fetchAndUpdateStakepoolData(stakepoolIds).then(freshData => {
+            // Update the cache once the fresh data is fetched
+            prisma.stakepoolDataCache.update({
+              where: { spoListKey },
+              data: { data: freshData }, // Here, we're not updating the timestamp because it was already set
+            }).catch(error => {
+              console.error('Failed to update cache:', error);
+            });
+          }).catch(error => {
+            console.error('Failed to fetch fresh data:', error);
+          });
+
+          // Return the stale data immediately (since await wasn't used)
+          return cachedData.data;
+        }
+      } else {
+        // If no cache exists, fetch new data, wait for it, update the cache, and return the data
+        const freshData = await fetchAndUpdateStakepoolData(stakepoolIds);
+        await prisma.stakepoolDataCache.create({
+          data: {
+            spoListKey,
+            data: freshData,
+            updatedAt: new Date(), // Set the timestamp here
+          },
+        });
+        return freshData;
+      }
+    }),
+});

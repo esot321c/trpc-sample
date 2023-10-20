@@ -26,7 +26,7 @@ import "swiper/css/navigation";
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
-import { IProject } from '@pages/projects/[project_id]';
+import { IProject } from '@pages/projects/[project_slug]';
 import ProjectCard from '@components/projects/ProjectCard';
 
 SwiperCore.use([Navigation]);

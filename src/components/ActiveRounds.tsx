@@ -12,7 +12,7 @@ import { useWhitelistProjects } from "@hooks/useWhitelistProjects";
 import { useContributionProjects } from "@hooks/useContributionProjects";
 import Image from 'next/image';
 import Link from '@components/Link';
-import { IProject } from '@pages/projects/[project_id]';
+import { IProject } from '@pages/projects/[project_slug]';
 
 var months = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

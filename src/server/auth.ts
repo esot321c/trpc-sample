@@ -19,21 +19,29 @@ declare module "next-auth" {
       address?: string;
       image?: string;
       walletType?: string;
+      isAdmin?: boolean;
     };
   }
   interface User {
     id: string;
+    created_at: Date; // assuming this gets converted to a JavaScript Date object when fetched
+    updated_at: Date; // same assumption as created_at
     name: string | null;
-    rewardAddress: string | null;
+    status: string | null;
     defaultAddress: string | null;
     nonce: string | null;
     email: string | null;
     emailVerified: Date | null;
     image: string | null;
-    walletType: string;
-  }
-  interface Session {
-    walletType?: string;
+    sumsubId: string | null;
+    sumsubType: string | null;
+    sumsubResult: any | null; // 'any' used for JSON, consider defining a more specific interface if the JSON structure is known
+    sumsubStatus: string | null;
+    // accounts: Account[]; // assumes you have an 'Account' interface or type defined
+    // sessions: Session[]; // assumes you have a 'Session' interface or type defined
+    // wallets: Wallet[]; // assumes you have a 'Wallet' interface or type defined
+    // transactions: Transaction[]; // assumes you have a 'Transaction' interface or type defined
+    whitelists: string[];
   }
   interface JWT {
     walletType?: string;
@@ -53,28 +61,6 @@ declare module "next-auth" {
     session_state?: string | null;
     user: User;
   }
-  interface UserProfile {
-    id: string;
-    auth_user_id?: string;
-    created_at: Date;
-    updated_at: Date;
-    email_verified?: Date;
-    first_name?: string;
-    last_name?: string;
-    middle_name?: string;
-    legal_name?: string;
-    birth_date?: string;
-    country?: string;
-    birth_country?: string;
-    birth_state?: string;
-    birth_place?: string;
-    marital_status?: string;
-    nationality?: string;
-    occupation?: string;
-    addresses: Address[];
-    image?: string;
-    transactions: Transaction[];
-  }
   interface Address {
     id: string;
     address_line_1: string;
@@ -87,14 +73,13 @@ declare module "next-auth" {
     postal_code: string;
     country: string;
     user_id: string;
-    user: UserProfile;
   }
   interface Wallet {
     id: number;
     rewardAddress: string;
     changeAddress: string;
     user_id: string;
-    user?: UserProfile;
+    user?: User;
   }
   interface Transaction {
     id: string;
@@ -104,7 +89,7 @@ declare module "next-auth" {
     address: string;
     completed: boolean;
     created_at: string;
-    user?: UserProfile;
+    user?: User;
   }
 }
 

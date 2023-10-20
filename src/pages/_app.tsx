@@ -7,13 +7,13 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Layout from "@components/layout/Layout";
 import Head from "next/head";
 import { ThemeContext } from "@contexts/ThemeContext";
-import { UserContext } from "@contexts/UserContext";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import AlertWrapper, { IAlertMessages } from "@components/AlertWrapper";
 import { MeshProvider } from "@meshsdk/react";
-import { trpc } from '@utils/trpc';
+import { trpc } from '@lib/utils/trpc';
 import { SessionProvider } from "next-auth/react"
+import { WalletProvider } from "@contexts/WalletContext";
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   const [theme, setTheme] = useState(LightTheme);
@@ -42,7 +42,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
           <ThemeProvider theme={theme}>
             <ThemeContext.Provider value={{ theme, setTheme }}>
               <MeshProvider>
-                <UserContext.Provider value={{ userInfo, setUserInfo }}>
+                <WalletProvider>
                   <CssBaseline enableColorScheme />
                   <Layout>
                     <Component {...pageProps} />
@@ -55,7 +55,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
                       );
                     }}
                   />
-                </UserContext.Provider>
+                </WalletProvider>
               </MeshProvider>
             </ThemeContext.Provider>
           </ThemeProvider>

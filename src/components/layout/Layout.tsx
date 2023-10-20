@@ -9,13 +9,6 @@ import {
   Backdrop,
   CircularProgress
 } from "@mui/material";
-import { useSession } from "next-auth/react"
-
-const variants = {
-  hidden: { opacity: 0, x: 0, y: 500 },
-  enter: { opacity: 1, x: 0, y: 0 },
-  exit: { opacity: 0, x: 0, y: -100 },
-};
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -24,8 +17,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setBackdrop(false)
   }, [])
-
-  const { data: session } = useSession()
 
   return (
     <>

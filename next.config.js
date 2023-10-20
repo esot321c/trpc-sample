@@ -13,6 +13,7 @@ const nextConfig = {
       asyncWebAssembly: true,
       layers: true,
     };
+    config.ignoreWarnings = [/Critical dependency: the request of a dependency is an expression/];
     return config;
   },
 }

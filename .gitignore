@@ -44,3 +44,7 @@ next-env.d.ts
 localhost.crt
 localhost.key
 server.js
+ssl.crt
+ssl.key
+
+/db

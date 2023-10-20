@@ -2,22 +2,9 @@ import { Typography, Box, Container, Grid, useTheme } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useWhitelistProjects } from "@hooks/useWhitelistProjects";
-import { useContributionProjects } from "@hooks/useContributionProjects";
 import ProjectCard from "@components/projects/ProjectCard";
-import { ActiveProjectCard } from "@components/projects/ActiveProjectCard";
-import { IProject } from "./[project_id]";
+import { IProject } from "./[project_slug]";
 import SearchBar from "@components/SearchBar";
-import { v4 as uuidv4 } from 'uuid';
-
-interface IProjectDetails {
-  title: string;
-  tagline: string;
-  imageUrl: string;
-  category: string;
-  status: "Complete" | "Upcoming";
-  blockchains: string[];
-}
 
 const Projects = () => {
   const theme = useTheme()
@@ -70,12 +57,6 @@ const Projects = () => {
   const upcomingProjects = filteredProjects?.filter(
     (project: IProjectDetails) => project.status === "Upcoming"
   );
-  const { whiteListProjectsActive, isLoading: whiteListProjectsIsLoading } =
-    useWhitelistProjects();
-  const {
-    contributionProjectsActive,
-    isLoading: contributionProjectsIsLoading,
-  } = useContributionProjects();
 
   return (
     <>
@@ -99,38 +80,6 @@ const Projects = () => {
             }}
           />
         )}
-        {/* {(!contributionProjectsIsLoading && contributionProjectsActive.length !== 0) ||
-          (!whiteListProjectsIsLoading && whiteListProjectsActive.length !== 0) && (
-            <>
-              <Typography variant="h4" sx={{ fontWeight: "800", mb: 4 }}>
-                Active Rounds
-              </Typography>
-              <Grid container spacing={3} alignItems="stretch" sx={{ mb: 6 }}>
-                {contributionProjectsActive?.map((project: any) => {
-                  if (project !== undefined && project.id !== undefined) {
-                    return (
-                      <ActiveProjectCard
-                        key={project.id}
-                        type="contribution"
-                        project={project}
-                      />
-                    )
-                  }
-                })}
-                {whiteListProjectsActive?.map((project: any) => {
-                  if (project !== undefined && project.id !== undefined) {
-                    return (
-                      <ActiveProjectCard
-                        key={project.id}
-                        type="whitelist"
-                        project={project}
-                      />
-                    )
-                  }
-                })}
-              </Grid>
-            </>
-          )} */}
         {upcomingProjects.length > 0 &&
           <>
             <Typography variant="h4" sx={{ fontWeight: "800", mb: 4 }}>
