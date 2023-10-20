@@ -5,9 +5,9 @@ import {
   useTheme,
   Avatar,
   Typography,
-  Button
+  Button,
+  useMediaQuery
 } from '@mui/material'
-import { WalletContext } from '@contexts/WalletContext';
 import { useRouter } from 'next/router';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -19,16 +19,12 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import SellIcon from '@mui/icons-material/Sell';
 import EditIcon from '@mui/icons-material/Edit';
-import SignIn from '@src/components/user/SignIn';
-import { useWallet, useAddress, useWalletList } from '@meshsdk/react';
-import { getShortAddress } from '@utils/general';
-import { SxProps } from '@mui/system';
-import { useSession } from 'next-auth/react';
-import { trpc } from "@utils/trpc";
+import SignIn from '@components/user/SignIn';
+import { useWallet, useWalletList } from '@meshsdk/react';
+import { getShortAddress } from '@lib/utils/general';
+import { trpc } from "@lib/utils/trpc";
 import { signIn, signOut } from "next-auth/react"
-
-const WALLET_ADDRESS = "wallet_address_coinecta";
-const WALLET_NAME = "wallet_name_coinecta";
+import { useWalletContext } from '@contexts/WalletContext';
 
 interface IWalletType {
   name: string;
@@ -41,121 +37,154 @@ interface IUserMenuProps {
 
 const UserMenu: FC<IUserMenuProps> = () => {
   const theme = useTheme()
+  const desktop = useMediaQuery(theme.breakpoints.up('md'))
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false)
-  const walletContext = useWallet()
-  const connectedWalletAddress = useAddress();
+  const { wallet, connected, name, connecting, connect, disconnect, error } = useWallet()
   const [rewardAddress, setRewardAddress] = useState<string | undefined>(undefined);
-  const result = trpc.user.getNonce.useQuery({ userAddress: rewardAddress }, { enabled: false, retry: false });
-  const [newNonce, setNewNonce] = useState<string | undefined>(undefined)
+  const [changeAddress, setChangeAddress] = useState<string | undefined>(undefined)
+  const [usedAddresses, setUsedAddresses] = useState<string[] | undefined>(undefined)
+  const [unusedAddresses, setUnusedAddresses] = useState<string[] | undefined>(undefined)
+  const getNonce = trpc.user.getNonce.useQuery({ rewardAddress }, { enabled: false, retry: false });
+  const deleteEmptyUser = trpc.user.deleteEmptyUser.useMutation()
+  const [newNonce, setNewNonce] = useState<TNonceResponse | undefined>(undefined)
+  const { providerLoading, setProviderLoading, sessionStatus, sessionData, fetchSessionData } = useWalletContext()
   const [walletIcon, setWalletIcon] = useState<string | undefined>(undefined)
-  const walletList = useWalletList();
-  const { data: sessionData, status: sessionStatus } = useSession();
-  const [providerLoading, setProviderLoading] = useState(true)
-  // const walletTypeQuery = trpc.user.getUserWalletType.useQuery({}, {
-  //   enabled: sessionStatus === 'authenticated', // Only run the query if this is true
-  // });
+  const walletsList = useWalletList();
 
   useEffect(() => {
-    if (sessionStatus === 'authenticated' || sessionStatus === 'unauthenticated') {
-      setProviderLoading(false)
+    // console.log(`connected: ${connected}`)
+    // console.log(`rewardAddress: ${rewardAddress}`)
+    // console.log(`sessionStatus: ${sessionStatus}`)
+    // console.log(`sessionData: ${sessionData?.user.walletType}`)
+
+    // user has a wallet connected, we've got the reward address, but they still need to sign in
+    if (connected && !rewardAddress && sessionStatus === 'unauthenticated') {
+      // console.log('getting addresses')
+      getAddresses()
     }
-    console.log('walllet type: ' + sessionData?.user.walletType)
-    if (sessionStatus === 'authenticated' && sessionData.user.walletType) {
-      walletContext.connect(sessionData.user.walletType)
 
+    if (connected && rewardAddress && sessionStatus === 'unauthenticated') {
+      // console.log('refetching (initiate login flow)')
+      refetchData()
     }
-  }, [sessionStatus, setProviderLoading])
 
-  // useEffect(() => {
-  //   console.log('wallet type query: ' + walletTypeQuery.data)
-  //   console.log('session status: ' + sessionStatus)
-  //   if (walletTypeQuery.data && !walletContext.connected) {
-  //     // Connect to the user's Cardano wallet using the wallet type
-  //     walletContext.connect(walletTypeQuery.data)
-  //   }
-  // }, [walletTypeQuery.data]); // Depend on the query's data
+    // user doesn't have a wallet connected, but navigates to the page with an active session
+    // we have to verify the wallet type that should automatically be connected
+    if (!connected && !rewardAddress && sessionStatus === 'authenticated' && sessionData?.user.walletType) {
+      // console.log('connect first then get addresses')
+      connectFirstThenGetAddresses()
+    }
 
-  useEffect(() => {
-    if (walletContext.connected) {
-      async function getUserAddress() {
-        const address = await walletContext.wallet.getRewardAddresses();
-        const walletTypeObject: IWalletType[] = walletList.filter(item => item.name === walletContext.name);
-        setWalletIcon(walletTypeObject[0].icon)
-        // console.log('connected Wallet Address: ' + connectedWalletAddress)
-        // console.log('got user address: ' + address[0])
-        setRewardAddress(address[0]);
+    if (connected && sessionData?.user.walletType) {
+      // console.log('setting wallet icon')
+      if (!rewardAddress) getAddresses()
+      const thisWallet = walletsList.filter(wallet => wallet.name === sessionData.user.walletType)
+      setWalletIcon(thisWallet[0].icon)
+    }
+  }, [rewardAddress, connected, sessionStatus]);
+
+  const connectFirstThenGetAddresses = async () => {
+    try {
+      if (sessionStatus === 'authenticated' && sessionData?.user.walletType) {
+        await connect(sessionData.user.walletType);
       }
-      getUserAddress();
+      else throw new Error('not authenticated')
+    } catch (error) {
+      // Handle or log error as appropriate
+      console.error('An error occurred:', error);
     }
-  }, [walletContext.connected]);
+  }
 
-  useEffect(() => {
-    console.log('connected: ' + walletContext.connected)
-    console.log('rewardAddress: ' + rewardAddress)
-    if (rewardAddress && walletContext.connected && sessionStatus === 'unauthenticated') {
-      result.refetch()
-        .then((response: any) => {
-          console.log(response)
-        })
-        .catch((error: any) => {
-          console.error(error);
-        });
-      console.log('result refetched')
-    }
-  }, [rewardAddress, sessionStatus]);
+  const getAddresses = async () => {
+    const thisChangeAddress = await wallet.getChangeAddress();
+    const thisRewardAddress = await wallet.getRewardAddresses();
+    const thisUnusedAddresses = await wallet.getUnusedAddresses();
+    const thisUsedAddresses = await wallet.getUsedAddresses();
+    setRewardAddress(thisRewardAddress[0]);
+    setChangeAddress(thisChangeAddress)
+    setUsedAddresses(thisUsedAddresses)
+    setUnusedAddresses(thisUnusedAddresses)
+    // console.log('connected Wallet Address: ' + connectedWalletAddress)
+    // console.log('got user address: ' + address[0])
+  }
 
-  useEffect(() => {
-    if (result?.data?.nonce !== null && result?.data?.nonce !== undefined && sessionStatus === 'unauthenticated') {
-      setNewNonce(result.data.nonce)
-    }
-  }, [result.data, sessionStatus])
+  // get the new nonce
+  const refetchData = () => {
+    getNonce.refetch()
+      .then((response: any) => {
+        if (response && response.error) {
+          throw new Error(response.error.message);
+        }
+        setNewNonce(response.data.nonce)
+      })
+      .catch((error: any) => {
+        console.error('Nonce error: ' + error);
+      });
+  }
 
   useEffect(() => {
     if (newNonce && rewardAddress) {
-      console.log('verifying ownership with nonce: ' + newNonce)
-      if (sessionStatus === 'unauthenticated') {
+      if (sessionStatus === 'unauthenticated' && newNonce) {
         verifyOwnership(newNonce, rewardAddress)
       }
     }
   }, [newNonce, sessionStatus])
 
-  const verifyOwnership = (nonce: string, address: string) => {
+  const verifyOwnership = async (nonce: TNonceResponse, address: string) => {
+    if (!nonce) {
+      console.error('Invalid nonce');
+      cleanup();
+      return;
+    }
+
     setProviderLoading(true)
-    console.log('nonce: ' + nonce)
-    console.log('address: ' + address)
-    walletContext.wallet.signData(address, nonce)
-      .then((signature: { key: string; signature: string; }) => {
-        console.log(signature)
-        return signIn("credentials", {
-          nonce,
-          rewardAddress: rewardAddress,
+
+    try {
+      const signature = await wallet.signData(address, nonce.nonce)
+      // console.log(signature)
+
+      if (!signature.signature || !signature.key) {
+        console.error('signature failed to generate');
+        cleanupForAuth(nonce);
+        return;
+      }
+
+      try {
+        const response = await signIn("credentials", {
+          nonce: nonce.nonce,
+          userId: nonce.userId,
           signature: JSON.stringify(signature),
           wallet: JSON.stringify({
-            type: walletContext.name,
+            type: name,
             rewardAddress,
-            address: connectedWalletAddress,
-            icon: walletIcon
+            changeAddress,
+            unusedAddresses,
+            usedAddresses
           }),
           redirect: false
         });
-      })
-      .then((response: any) => {
-        if (response.status !== 200 || !response.status) {
-          console.log('disconnect')
-          setRewardAddress(undefined)
-          walletContext.disconnect()
+
+        if (!response?.status || response.status !== 200) {
+          // console.log(response)
+          cleanupForAuth(nonce);
+          return;
         }
-        console.log(response)
-        setProviderLoading(false)
-      })
-      .catch((error: any) => {
-        console.log('disconnect')
-        setRewardAddress(undefined)
-        walletContext.disconnect()
-        console.error(error);
-        setProviderLoading(false)
-      });
+
+      } catch (error) {
+        console.error('Error during signIn:', error);
+        cleanupForAuth(nonce);
+        return;
+      }
+
+    } catch (error) {
+      console.error('Error during wallet signature:', error);
+      cleanupForAuth(nonce);
+    } finally {
+      await fetchSessionData();
+      setProviderLoading(false)
+      setModalOpen(false);
+    }
   }
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -167,12 +196,19 @@ const UserMenu: FC<IUserMenuProps> = () => {
     setAnchorEl(null);
   };
 
-  const clearWallet = async () => {
-    localStorage.setItem(WALLET_ADDRESS, '');
-    localStorage.setItem(WALLET_NAME, '');
+  const cleanupForAuth = (nonce: TNonceResponse) => {
+    deleteEmptyUser.mutateAsync({
+      userId: nonce.userId
+    });
+    cleanup()
+  };
+
+  const cleanup = () => {
     setRewardAddress(undefined)
-    walletContext.disconnect()
-    signOut()
+    setChangeAddress(undefined)
+    setUsedAddresses([])
+    setUnusedAddresses([])
+    disconnect()
   };
 
   return (
@@ -187,24 +223,29 @@ const UserMenu: FC<IUserMenuProps> = () => {
           {providerLoading ? 'Loading...' : 'Sign in'}
         </Button>
       )}
-      {sessionStatus === 'authenticated' && (
+      {sessionStatus === 'authenticated' && sessionData && (
         <>
-          {sessionData.user.walletType}
           <IconButton
             sx={{
               color: theme.palette.text.primary,
               border: `1px solid ${theme.palette.divider}`,
-              borderRadius: '4px',
-              mr: 2
+              borderRadius: '4px'
             }}
+            disabled={providerLoading}
             onClick={handleClick}
           >
-            <Avatar src={sessionData.user.image} sx={{ width: '24px', height: '24px', mr: 1 }} variant="square" />
-            {connectedWalletAddress &&
-              <Typography>
-                {getShortAddress(connectedWalletAddress)}
-              </Typography>
-            }
+            {providerLoading ? <Typography>Loading...</Typography> :
+              (
+                <>
+                  <Avatar src={sessionData.user.image ?? walletIcon} sx={{ width: '24px', height: '24px', mr: 1 }} variant="square" />
+                  {changeAddress && desktop &&
+                    <Typography>
+                      {getShortAddress(changeAddress)}
+                    </Typography>
+
+                  }
+                </>
+              )}
           </IconButton>
           <Menu
             anchorEl={anchorEl}
@@ -246,7 +287,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
           >
             <MenuItem
               sx={{ mt: '6px' }}
-              onClick={() => router.push('/users/' + walletContext.wallet.getChangeAddress)}
+              onClick={() => router.push('/users/' + wallet.getChangeAddress)}
             >
               <Avatar /> View Profile
             </MenuItem>
@@ -263,7 +304,11 @@ const UserMenu: FC<IUserMenuProps> = () => {
               </ListItemIcon>
               Change Wallet
             </MenuItem>
-            <MenuItem onClick={() => clearWallet()}>
+            <MenuItem onClick={() => {
+              cleanup()
+              setProviderLoading(true)
+              signOut()
+            }}>
               <ListItemIcon>
                 <Logout fontSize="small" />
               </ListItemIcon>

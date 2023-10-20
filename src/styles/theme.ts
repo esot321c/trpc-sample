@@ -1,6 +1,5 @@
-import { ThemeContext } from "@emotion/react";
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
-import localFont from 'next/font/local'
+import localFont from 'next/font/local';
 
 declare module '@mui/material/styles' {
   interface TypeBackground {
@@ -16,43 +15,43 @@ const mainTheme = [{
     h1: {
       fontWeight: "600",
     },
-    // h2: {
-    //   fontWeight: "600",
-    // },
-    // h3: {
-    //   fontSize: "3rem",
-    //   fontWeight: "800",
-    //   lineHeight: 1.167,
-    //   marginBottom: "1rem",
-    //   overflowWrap: "break-word",
-    //   hyphens: "manual",
-    // },
-    // h4: {
-    //   fontSize: "2rem",
-    //   fontWeight: "700",
-    //   lineHeight: 1.235,
-    //   marginBottom: "0.5rem",
-    //   overflowWrap: "break-word",
-    //   hyphens: "manual",
-    // },
-    // h5: {
-    //   fontSize: "1.5rem",
-    //   fontWeight: "700",
-    //   lineHeight: 1.6,
-    //   letterSpacing: "0.0075em",
-    //   marginBottom: "0.5rem",
-    //   overflowWrap: "break-word",
-    //   hyphens: "manual",
-    // },
-    // h6: {
-    //   fontSize: "1.2rem",
-    //   fontWeight: "600",
-    //   lineHeight: 1.3,
-    //   letterSpacing: "0.0075em",
-    //   marginBottom: "0",
-    //   overflowWrap: "break-word",
-    //   hyphens: "manual",
-    // },
+    h2: {
+      fontWeight: "700",
+    },
+    h3: {
+      // fontSize: "3rem",
+      fontWeight: "700",
+      // lineHeight: 1.167,
+      // marginBottom: "1rem",
+      // overflowWrap: "break-word",
+      // hyphens: "manual",
+    },
+    h4: {
+      // fontSize: "2rem",
+      fontWeight: "700",
+      // lineHeight: 1.235,
+      // marginBottom: "0.5rem",
+      // overflowWrap: "break-word",
+      // hyphens: "manual",
+    },
+    h5: {
+      // fontSize: "1.5rem",
+      fontWeight: "700",
+      // lineHeight: 1.6,
+      // letterSpacing: "0.0075em",
+      // marginBottom: "0.5rem",
+      // overflowWrap: "break-word",
+      // hyphens: "manual",
+    },
+    h6: {
+      // fontSize: "1.4rem",
+      fontWeight: "600",
+      // lineHeight: 1.3,
+      // letterSpacing: "0.0075em",
+      // marginBottom: "0",
+      // overflowWrap: "break-word",
+      // hyphens: "manual",
+    },
     // overline: {
     //   textTransform: 'uppercase',
     //   fontSize: '0.75rem',
@@ -103,7 +102,7 @@ const mainTheme = [{
     },
     MuiPaper: {
       defaultProps: {
-        elevation: 0, 
+        elevation: 0,
       },
       styleOverrides: {
         root: {
@@ -346,7 +345,7 @@ let darkTheme = createTheme({
       color: 'rgba(228,228,228,1)',
     },
     button: {
-      
+
     }
   },
   components: {

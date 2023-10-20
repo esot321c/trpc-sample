@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState, useEffect } from 'react';
+import React, { FC } from 'react';
 import {
   Typography,
   Grid as MuiGrid,
@@ -31,10 +31,10 @@ const ProjectCard: FC<IProjectCard> = ({
   link
 }) => {
   return (
-    <Card>
+    <Card sx={{ maxWidth: '560px' }}>
       <CardMedia
         component="img"
-        image={imageUrl}
+        image={imageUrl || '/banner.jpg'}
         alt={`${title} Banner`}
         sx={{ height: '240px' }}
       />
@@ -55,10 +55,10 @@ const ProjectCard: FC<IProjectCard> = ({
         </Typography>
         <MuiGrid container justifyContent="space-between" alignItems="center">
           <MuiGrid item>
-          {blockchains.map((item, i) => {
-            const key = uuidv4()
-            return <Chip variant="outlined" label={item} key={key} sx={{ mr: 1 }} />
-          })}
+            {blockchains.map((item, i) => {
+              const key = uuidv4()
+              return <Chip variant="outlined" label={item} key={key} sx={{ mr: 1 }} />
+            })}
           </MuiGrid>
           <MuiGrid item>
             <Button href={link} variant="contained" color="secondary" size="small">

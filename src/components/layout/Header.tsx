@@ -15,9 +15,8 @@ import { ThemeContext } from "@contexts/ThemeContext";
 import { useRouter } from 'next/router';
 import Logo from '@components/svgs/Logo';
 import NotificationsMenu from '@components/notifications/NotificationsMenu'
-import UserMenu from '@src/components/user/UserMenu';
+import UserMenu from '@components/user/UserMenu';
 import SocialGrid from './SocialGrid';
-import { signIn, signOut, useSession } from "next-auth/react";
 
 const pages = [
   {
@@ -90,6 +89,7 @@ const Header: FC<IHeaderProps> = ({ }) => {
                 textDecoration: "none",
                 fontWeight: fontWeight ? fontWeight : '500',
                 px: '8px',
+                mb: 0
               }}
             >
               {page.name}
@@ -202,7 +202,7 @@ const Header: FC<IHeaderProps> = ({ }) => {
                 container
                 justifyContent="flex-start"
                 alignItems="center"
-                spacing={{ xs: 1, md: 3 }}
+                spacing={{ xs: 1, md: 2 }}
               >
                 <Grid item sx={{ display: { xs: "none", md: "flex" } }}>
                   <Grid
@@ -214,15 +214,16 @@ const Header: FC<IHeaderProps> = ({ }) => {
                     ))}
                   </Grid>
                 </Grid>
-                <Grid
-                  item
-                >
-
-                  {/* <NotificationsMenu />*/}
-                  <UserMenu />
+                <Grid item>
                   <IconButton onClick={toggleTheme} sx={{ color: theme.palette.text.primary }}>
                     {(theme === DarkTheme) ? <Brightness7Icon /> : <Brightness4Icon />}
                   </IconButton>
+                </Grid>
+                <Grid
+                  item
+                >
+                  {/* <NotificationsMenu />*/}
+                  <UserMenu />
                 </Grid>
                 <Grid item sx={{ display: { xs: "flex", md: "none" } }}>
                   <Box
