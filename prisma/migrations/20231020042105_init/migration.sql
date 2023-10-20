@@ -1,74 +1,89 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "accounts" (
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "provider_account_id" TEXT NOT NULL,
+    "refresh_token" TEXT,
+    "access_token" TEXT,
+    "expires_at" INTEGER,
+    "token_type" TEXT,
+    "scope" TEXT,
+    "id_token" TEXT,
+    "session_state" TEXT,
 
-  - You are about to drop the `Project` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Roadmap` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Socials` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Team` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Tokenomic` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Tokenomics` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Whitelist` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `WhitelistSignup` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `pools` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `spos` table. If the table is not empty, all the data it contains will be lost.
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("id")
+);
 
-*/
--- DropForeignKey
-ALTER TABLE "Roadmap" DROP CONSTRAINT "Roadmap_project_slug_fkey";
+-- CreateTable
+CREATE TABLE "sessions" (
+    "id" TEXT NOT NULL,
+    "session_token" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "walletType" TEXT,
+    "expires" TIMESTAMP(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "Socials" DROP CONSTRAINT "Socials_project_slug_fkey";
+    CONSTRAINT "sessions_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "Team" DROP CONSTRAINT "Team_project_slug_fkey";
+-- CreateTable
+CREATE TABLE "users" (
+    "id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "name" TEXT,
+    "status" TEXT,
+    "is_admin" BOOLEAN NOT NULL DEFAULT false,
+    "default_address" TEXT,
+    "reward_address" TEXT,
+    "walletType" TEXT,
+    "nonce" TEXT,
+    "email" TEXT,
+    "email_verified" TIMESTAMP(3),
+    "image" TEXT,
+    "sumsub_id" TEXT,
+    "sumsub_type" TEXT,
+    "sumsub_result" JSONB,
+    "sumsub_status" TEXT,
 
--- DropForeignKey
-ALTER TABLE "Tokenomic" DROP CONSTRAINT "Tokenomic_tokenomicsId_fkey";
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "Tokenomics" DROP CONSTRAINT "Tokenomics_project_slug_fkey";
+-- CreateTable
+CREATE TABLE "verificationtokens" (
+    "identifier" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL
+);
 
--- DropForeignKey
-ALTER TABLE "Whitelist" DROP CONSTRAINT "Whitelist_project_slug_fkey";
+-- CreateTable
+CREATE TABLE "wallets" (
+    "id" SERIAL NOT NULL,
+    "type" TEXT NOT NULL,
+    "reward_address" TEXT NOT NULL,
+    "change_address" TEXT NOT NULL,
+    "unused_addresses" TEXT[],
+    "used_addresses" TEXT[],
+    "user_id" TEXT NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "WhitelistSignup" DROP CONSTRAINT "WhitelistSignup_user_id_fkey";
+    CONSTRAINT "wallets_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "WhitelistSignup" DROP CONSTRAINT "WhitelistSignup_whitelist_slug_fkey";
+-- CreateTable
+CREATE TABLE "transactions" (
+    "id" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+    "currency" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "completed" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "user_id" TEXT NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "pools" DROP CONSTRAINT "pools_poolId_fkey";
-
--- DropTable
-DROP TABLE "Project";
-
--- DropTable
-DROP TABLE "Roadmap";
-
--- DropTable
-DROP TABLE "Socials";
-
--- DropTable
-DROP TABLE "Team";
-
--- DropTable
-DROP TABLE "Tokenomic";
-
--- DropTable
-DROP TABLE "Tokenomics";
-
--- DropTable
-DROP TABLE "Whitelist";
-
--- DropTable
-DROP TABLE "WhitelistSignup";
-
--- DropTable
-DROP TABLE "pools";
-
--- DropTable
-DROP TABLE "spos";
+    CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "spo_signups" (
@@ -85,29 +100,57 @@ CREATE TABLE "spo_signups" (
 );
 
 -- CreateTable
+CREATE TABLE "stakepools" (
+    "id" SERIAL NOT NULL,
+    "pool_id" TEXT NOT NULL,
+    "hex" TEXT,
+    "url" TEXT,
+    "hash" TEXT,
+    "ticker" TEXT,
+    "name" TEXT,
+    "description" TEXT,
+    "homepage" TEXT,
+
+    CONSTRAINT "stakepools_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "stakepool_stats" (
     "id" SERIAL NOT NULL,
-    "poolId" TEXT NOT NULL,
+    "pool_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
     "hex" TEXT NOT NULL,
-    "vrfKey" TEXT NOT NULL,
-    "blocksMinted" INTEGER NOT NULL,
-    "blocksEpoch" INTEGER NOT NULL,
-    "liveStake" TEXT NOT NULL,
-    "liveSize" DOUBLE PRECISION NOT NULL,
-    "liveSaturation" DOUBLE PRECISION NOT NULL,
-    "liveDelegators" INTEGER NOT NULL,
-    "activeStake" TEXT NOT NULL,
-    "activeSize" DOUBLE PRECISION NOT NULL,
-    "declaredPledge" TEXT NOT NULL,
-    "livePledge" TEXT NOT NULL,
-    "marginCost" DOUBLE PRECISION NOT NULL,
-    "fixedCost" TEXT NOT NULL,
-    "rewardAccount" TEXT NOT NULL,
+    "vrf_key" TEXT NOT NULL,
+    "blocks_minted" INTEGER NOT NULL,
+    "blocks_epoch" INTEGER NOT NULL,
+    "live_stake" TEXT NOT NULL,
+    "live_size" DOUBLE PRECISION NOT NULL,
+    "live_saturation" DOUBLE PRECISION NOT NULL,
+    "live_delegators" INTEGER NOT NULL,
+    "active_stake" TEXT NOT NULL,
+    "active_size" DOUBLE PRECISION NOT NULL,
+    "declared_pledge" TEXT NOT NULL,
+    "live_pledge" TEXT NOT NULL,
+    "margin_cost" DOUBLE PRECISION NOT NULL,
+    "fixed_cost" TEXT NOT NULL,
+    "reward_account" TEXT NOT NULL,
     "owners" TEXT[],
     "registration" TEXT[],
     "retirement" TEXT[],
 
     CONSTRAINT "stakepool_stats_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stakepool_cache" (
+    "id" SERIAL NOT NULL,
+    "spoListKey" TEXT NOT NULL,
+    "data" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "stakepool_cache_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -126,6 +169,7 @@ CREATE TABLE "projects" (
     "avatar_img_url" TEXT NOT NULL,
     "is_launched" BOOLEAN NOT NULL,
     "is_draft" BOOLEAN NOT NULL,
+    "fiso_pool_ids" TEXT[],
 
     CONSTRAINT "projects_pkey" PRIMARY KEY ("id")
 );
@@ -226,10 +270,43 @@ CREATE TABLE "whitelist_signups" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "accounts_provider_provider_account_id_key" ON "accounts"("provider", "provider_account_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "sessions_session_token_key" ON "sessions"("session_token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_default_address_key" ON "users"("default_address");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_reward_address_key" ON "users"("reward_address");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "verificationtokens_token_key" ON "verificationtokens"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "verificationtokens_identifier_token_key" ON "verificationtokens"("identifier", "token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "wallets_reward_address_key" ON "wallets"("reward_address");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "wallets_change_address_key" ON "wallets"("change_address");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "spo_signups_email_key" ON "spo_signups"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "stakepool_stats_poolId_key" ON "stakepool_stats"("poolId");
+CREATE UNIQUE INDEX "stakepools_pool_id_key" ON "stakepools"("pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stakepool_stats_pool_id_key" ON "stakepool_stats"("pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stakepool_cache_spoListKey_key" ON "stakepool_cache"("spoListKey");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "projects_name_key" ON "projects"("name");
@@ -250,7 +327,19 @@ CREATE UNIQUE INDEX "whitelists_name_key" ON "whitelists"("name");
 CREATE UNIQUE INDEX "whitelists_slug_key" ON "whitelists"("slug");
 
 -- AddForeignKey
-ALTER TABLE "stakepool_stats" ADD CONSTRAINT "stakepool_stats_poolId_fkey" FOREIGN KEY ("poolId") REFERENCES "stakepools"("poolId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "wallets" ADD CONSTRAINT "wallets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stakepool_stats" ADD CONSTRAINT "stakepool_stats_pool_id_fkey" FOREIGN KEY ("pool_id") REFERENCES "stakepools"("pool_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "project_socials" ADD CONSTRAINT "project_socials_project_slug_fkey" FOREIGN KEY ("project_slug") REFERENCES "projects"("slug") ON DELETE CASCADE ON UPDATE CASCADE;

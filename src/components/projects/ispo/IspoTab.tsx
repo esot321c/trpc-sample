@@ -23,9 +23,13 @@ const IspoTab: FC<IspoTabProps> = ({ fisoPoolIds, projectSlug }) => {
   }, [fisoPoolIds])
 
   const getStakepoolData = async () => {
-    const response = await stakepoolInfo.mutateAsync({ stakepoolIds: fisoPoolIds })
-    console.log(response)
-    setStakepoolData(response)
+    try {
+      const response = await stakepoolInfo.mutateAsync({ stakepoolIds: fisoPoolIds });
+      console.log(response);
+      setStakepoolData(response);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -43,7 +47,7 @@ const IspoTab: FC<IspoTabProps> = ({ fisoPoolIds, projectSlug }) => {
               <Grid container spacing={2}>
                 {stakepoolData.successfulStakePools.map((item: TFullStakePool, i: number) => {
                   return (
-                    <Grid xs={12} sm={6} md={4} key={`ispo-card-${i}`}>
+                    <Grid xs={12} sm={6} md={4} key={`ispo-card-${item.hex}`}>
                       <IspoFullCard stakepoolData={item} projectSlug={projectSlug} />
                     </Grid>
                   )

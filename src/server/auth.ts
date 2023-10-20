@@ -41,7 +41,7 @@ declare module "next-auth" {
     // sessions: Session[]; // assumes you have a 'Session' interface or type defined
     // wallets: Wallet[]; // assumes you have a 'Wallet' interface or type defined
     // transactions: Transaction[]; // assumes you have a 'Transaction' interface or type defined
-    whitelists: string[];
+    // whitelists: string[];
   }
   interface JWT {
     walletType?: string;

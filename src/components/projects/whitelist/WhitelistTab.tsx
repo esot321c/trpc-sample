@@ -55,6 +55,15 @@ const WhitelistTab: FC<WhitelistTabProps> = ({ whitelists, projectSlug }) => {
                 })}
               </Collapse>
               <Collapse in={checkVerificationResult.data?.sumsubStatus !== 'completed'} mountOnEnter unmountOnExit>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="h4" sx={{ mb: 0 }}>
+                    KYC/AML
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mb: 1 }}>
+                    Please complete KYC to whitelist for this project on Coinecta
+                  </Typography>
+                  <Sumsub setSumsubStatus={setSumsubStatus} />
+                </Box>
                 {whitelists.filter(item => item.externalLink).length > 0 &&
                   (
                     <Box sx={{ mb: 6 }}>
@@ -62,7 +71,7 @@ const WhitelistTab: FC<WhitelistTabProps> = ({ whitelists, projectSlug }) => {
                         External whitelists
                       </Typography>
                       <Typography color="text.secondary" sx={{ mb: 2 }}>
-                        Follow the instructions on the external site to complete the whitelist process for the following round(s)
+                        Follow the instructions on the external site to complete their whitelist process
                       </Typography>
                       {whitelists.filter(item => item.externalLink).map((item, i) => {
                         return (
@@ -71,13 +80,6 @@ const WhitelistTab: FC<WhitelistTabProps> = ({ whitelists, projectSlug }) => {
                       })}
                     </Box>
                   )}
-                <Typography variant="h4" sx={{ mb: 0 }}>
-                  KYC/AML
-                </Typography>
-                <Typography color="text.secondary" sx={{ mb: 1 }}>
-                  Please complete KYC to whitelist for this project.
-                </Typography>
-                <Sumsub setSumsubStatus={setSumsubStatus} />
               </Collapse>
             </Box>
           </>

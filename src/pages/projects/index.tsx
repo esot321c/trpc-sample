@@ -3,7 +3,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ProjectCard from "@components/projects/ProjectCard";
-import { IProject } from "./[project_slug]";
 import SearchBar from "@components/SearchBar";
 
 const Projects = () => {
@@ -18,8 +17,8 @@ const Projects = () => {
       try {
         const res = await axios.get(`${process.env.API_URL}/projects/`);
         setProjects(
-          res.data.filter((project: IProject) => project.name.toLowerCase().startsWith('cardano-'))
-            .map((item: IProject) => {
+          res.data.filter((project: TProject) => project.name.toLowerCase().startsWith('cardano-'))
+            .map((item: TProject) => {
               const projectName = item.name.replace(/cardano-(x-)?/, "")
               const category = item.fundsRaised === 9090
                 ? "Launchpad"

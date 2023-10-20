@@ -10,7 +10,6 @@ import {
   useTheme
 } from '@mui/material';
 import { Fragment, FC } from 'react';
-import { ITokenomic } from '@pages/projects/[project_slug]';
 
 const tokenomicsHeading: { [key: string]: string } = {
   name: 'Name',
@@ -26,7 +25,7 @@ const tokenomicsKeys = Object.keys(tokenomicsHeading);
 const tokenomicsHeadingValues = Object.values(tokenomicsHeading);
 
 interface IDistribution {
-  data: ITokenomic[],
+  data: TTokenomic[],
 }
 
 const Distribution: FC<IDistribution> = ({ data }) => {

@@ -38,7 +38,11 @@ const Project = () => {
   const [projectData, setProjectData] = useState<TProject | undefined>(undefined)
   const [isLoading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState<TTabs>('summary');
-  const project = trpc.project.getProject.useQuery({ slug: project_slug?.toString() })
+
+  const project = trpc.project.getProject.useQuery(
+    { slug: project_slug?.toString() },
+    { enabled: project_slug !== undefined }
+  )
 
   useEffect(() => {
     // Check if tab is one of the TTabs values and not an array

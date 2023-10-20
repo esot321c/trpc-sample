@@ -24,6 +24,7 @@ export const projectRouter = createTRPCRouter({
               avatarImgUrl: input.avatarImgUrl,
               isLaunched: input.isLaunched,
               isDraft: input.isDraft,
+              fisoPoolIds: input.fisoPoolIds,
               // Create the related records
               socials: { create: input.socials },
               roadmap: { create: input.roadmap },

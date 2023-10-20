@@ -26,7 +26,6 @@ import "swiper/css/navigation";
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
-import { IProject } from '@pages/projects/[project_slug]';
 import ProjectCard from '@components/projects/ProjectCard';
 
 SwiperCore.use([Navigation]);
@@ -49,7 +48,7 @@ const Projects: FC<IProjectsProps> = ({ }) => {
     const getProjects = async () => {
       try {
         const res = await axios.get(`${process.env.API_URL}/projects/`);
-        setProjects(res.data.filter((project: IProject) => project.name.toLowerCase().startsWith('cardano-')))
+        setProjects(res.data.filter((project: TProject) => project.name.toLowerCase().startsWith('cardano-')))
       } catch (e) {
         console.error(e);
       }
@@ -134,7 +133,7 @@ const Projects: FC<IProjectsProps> = ({ }) => {
                   modules={[Grid, Pagination, Navigation, Autoplay]}
                   className="mySwiper"
                 >
-                  {projects.map((item: IProject, i) => {
+                  {projects.map((item: TProject, i) => {
                     const uuid = uuidv4()
                     const projectName = item.name.replace(/cardano-(x-)?/, "")
                     const category = item.fundsRaised === 9090

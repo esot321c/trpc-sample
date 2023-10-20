@@ -50,11 +50,18 @@ export const stakepoolRouter = createTRPCRouter({
       } else {
         // If no cache exists, fetch new data, wait for it, update the cache, and return the data
         const freshData = await fetchAndUpdateStakepoolData(stakepoolIds);
-        await prisma.stakepoolDataCache.create({
-          data: {
-            spoListKey,
+        await prisma.stakepoolDataCache.upsert({
+          where: {
+            spoListKey: spoListKey,
+          },
+          update: {
             data: freshData,
-            updatedAt: new Date(), // Set the timestamp here
+            updatedAt: new Date(),
+          },
+          create: {
+            spoListKey: spoListKey,
+            data: freshData,
+            updatedAt: new Date(),
           },
         });
         return freshData;

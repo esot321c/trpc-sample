@@ -193,6 +193,19 @@ const CreateProjectForm: NextPage = () => {
     }
   };
 
+  const handleChangeFiso = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+
+    // Split the string by ',' to convert it to an array
+    // and use map to trim whitespace from each ID
+    const idsArray = value.split(',').map(id => id.trim());
+
+    updateFormData(prevState => ({
+      ...prevState,
+      [name]: idsArray,
+    }));
+  };
+
   const handleImageUpload = (res: { status: string; image_url?: string; message?: string }) => {
     if (res.status === 'success') {
       updateFormData({ ...formData, bannerImgUrl: res.image_url! });
@@ -253,10 +266,10 @@ const CreateProjectForm: NextPage = () => {
     e.preventDefault();
     setOpenError(false);
     setLoading(true);
-    // const errorCheck = Object.values(formErrors).every((v) => v === false);
-    // const emptyCheck = formData.bannerImgUrl !== '';
-    if (true
-      // errorCheck && emptyCheck
+    const errorCheck = Object.values(formErrors).every((v) => v === false);
+    const emptyCheck = formData.bannerImgUrl !== '';
+    if (
+      errorCheck && emptyCheck
     ) {
       const data = { ...formData };
 
@@ -661,6 +674,25 @@ const CreateProjectForm: NextPage = () => {
             }}
           />
         </Grid>
+
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: '700' }}>
+          ISPO
+        </Typography>
+        <Grid container item xs={12} sx={{ mb: 4 }}>
+          <Grid item xs={12}>
+            <TextField
+              InputProps={{ disableUnderline: true }}
+              fullWidth
+              id="fisoPoolIds"
+              label="Fiso Pool Ids (comma separated)"
+              name="fisoPoolIds"
+              variant="filled"
+              value={formData.fisoPoolIds?.join(', ')}
+              onChange={handleChangeFiso}
+            />
+          </Grid>
+        </Grid>
+
         <Typography variant="h4" sx={{ mb: 1, fontWeight: '700' }}>
           Additional Configuration
         </Typography>
