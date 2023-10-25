@@ -4,12 +4,12 @@ import React, { FC, useEffect, useState } from 'react';
 import { Alert, Collapse, Box, Typography, Paper, TextField, FilledInput } from '@mui/material';
 import { formatNumber, roundToTwo } from '@lib/utils/general';
 
-type IspoFullCardProps = {
+type FisoFullCardProps = {
   stakepoolData: TFullStakePool;
   projectSlug: string;
 }
 
-const IspoFullCard: FC<IspoFullCardProps> = ({ stakepoolData, projectSlug }) => {
+const FisoFullCard: FC<FisoFullCardProps> = ({ stakepoolData, projectSlug }) => {
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -38,4 +38,4 @@ const IspoFullCard: FC<IspoFullCardProps> = ({ stakepoolData, projectSlug }) => 
   );
 };
 
-export default IspoFullCard;
+export default FisoFullCard;

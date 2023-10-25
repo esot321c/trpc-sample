@@ -26,9 +26,9 @@ import WhitelistTab from "@components/projects/whitelist/WhitelistTab";
 import ContributeTab from "@components/projects/contribute/ContributeTab";
 import ProjectInfoTab from "@components/projects/info/ProjectInfoTab";
 import { trpc } from '@lib/utils/trpc';
-import IspoTab from "@components/projects/ispo/IspoTab";
+import FisoTab from "@components/projects/fiso/FisoTab";
 
-type TTabs = 'summary' | 'tokenomics' | 'whitelist' | 'contribute' | 'ispo'
+type TTabs = 'summary' | 'tokenomics' | 'whitelist' | 'contribute' | 'fiso'
 
 const Project = () => {
   const theme = useTheme()
@@ -38,11 +38,26 @@ const Project = () => {
   const [projectData, setProjectData] = useState<TProject | undefined>(undefined)
   const [isLoading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState<TTabs>('summary');
+  const [fisoPoolIds, setFisoPoolIds] = useState<string[]>([])
 
   const project = trpc.project.getProject.useQuery(
     { slug: project_slug?.toString() },
     { enabled: project_slug !== undefined }
   )
+  const fisos = trpc.project.getProjectFisos.useQuery(
+    { slug: project_slug?.toString() },
+    { enabled: project_slug !== undefined }
+  )
+
+  useEffect(() => {
+    if (fisos.isError) {
+      console.log('error getting project fisos')
+    }
+    // 
+    if (fisos.status === 'success' && fisos.data[0]?.approvedStakepools?.length > 0) {
+      setFisoPoolIds(fisos.data[0].approvedStakepools.map(stakepool => stakepool.poolId))
+    }
+  }, [fisos.status])
 
   useEffect(() => {
     // Check if tab is one of the TTabs values and not an array
@@ -172,14 +187,14 @@ const Project = () => {
               <Tab label="Tokenomics" value={'tokenomics'}></Tab>
               <Tab label="Whitelist" value={'whitelist'}></Tab>
               <Tab label="Contribute" value={'contribute'}></Tab>
-              <Tab label="ISPO" value={'ispo'}></Tab>
+              {fisoPoolIds.length > 0 && <Tab label="FISO" value={'fiso'}></Tab>}
             </Tabs>
-            <Box sx={{ mb: 12, mt: "2rem" }}>
+            <Box sx={{ mb: 12, mt: 2 }}>
               {tabValue === 'summary' && <ProjectInfoTab project={projectData} />}
               {tabValue === 'tokenomics' && <TokenomicsTab tokenomics={projectData.tokenomics} />}
               {tabValue === 'whitelist' && <WhitelistTab whitelists={projectData.whitelists} projectSlug={projectData.slug} />}
               {tabValue === 'contribute' && <ContributeTab />}
-              {tabValue === 'ispo' && <IspoTab projectSlug={projectData.slug} fisoPoolIds={projectData.fisoPoolIds} />}
+              {tabValue === 'fiso' && <FisoTab projectSlug={projectData.slug} fisoPoolIds={fisoPoolIds} />}
             </Box>
           </Container >
           : <Container sx={{ textAlign: 'center', py: '20vh' }}>

@@ -278,7 +278,6 @@ const CreateProjectForm: NextPage = () => {
       try {
         const response = await submitNewProject.mutateAsync(sanitizedData);
         console.log(response)
-        setOpenSuccess(true)
       } catch (error: any) {
         setErrorMessage(error.message || 'Invalid credentials or form data');
         setOpenError(true);
@@ -313,7 +312,7 @@ const CreateProjectForm: NextPage = () => {
     <AdminMenu>
       <Box component="form" onSubmit={handleSubmit}>
         <Typography variant="h2" sx={{ mt: 10, mb: 4, fontWeight: '700' }}>
-          Create Project
+          Edit Project
         </Typography>
         <Grid container spacing={2} />
         <Typography variant="h4" sx={{ mb: 1, fontWeight: '700' }}>

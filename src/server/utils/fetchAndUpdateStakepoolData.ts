@@ -1,20 +1,6 @@
 import { prisma } from '@server/prisma';
 import { TRPCError } from '@trpc/server';
-import axios from 'axios';
-
-const blockfrostId = process.env.BLOCKFROST_PROJECT_ID
-
-const blockfrostAPI = axios.create({
-  baseURL: 'https://cardano-mainnet.blockfrost.io/api/v0',
-  headers: { 'project_id': blockfrostId }
-});
-
-if (!blockfrostId) {
-  throw new TRPCError({
-    code: 'INTERNAL_SERVER_ERROR',
-    message: 'Blockfrost API key missing'
-  });
-}
+import { blockfrostAPI } from './blockfrostApi';
 
 export const fetchAndUpdateStakepoolData = async (stakepoolIds: string[]) => {
   // Variables to store successful and unsuccessful stakepools

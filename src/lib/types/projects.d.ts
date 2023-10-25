@@ -19,4 +19,13 @@ declare global {
   type TWhitelistSignup = z.infer<typeof ZodWhitelistSignup>;
   type TSocials = z.infer<typeof ZodSocials>;
   type TProject = z.infer<typeof ZodProject>;
+
+  interface IProjectDetails {
+    title: string;
+    tagline: string;
+    imageUrl: string;
+    category: string;
+    status: "Complete" | "Upcoming";
+    blockchains: string[];
+  }
 }

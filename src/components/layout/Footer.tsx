@@ -106,7 +106,7 @@ const Footer: FC = () => {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
   return (
-    <Container sx={{ display: 'block', position: 'relative', zIndex: 0 }}>
+    <Container sx={{ display: 'block', position: 'relative', zIndex: 100, background: theme.palette.background.default }}>
       <Grid
         container
         spacing={{ xs: 3, md: 1 }}

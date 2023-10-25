@@ -38,30 +38,43 @@ model Session {
 }
 
 model User {
-  id             String            @id @default(cuid())
-  created_at     DateTime          @default(now())
-  updated_at     DateTime          @updatedAt
+  id             String             @id @default(cuid())
+  created_at     DateTime           @default(now())
+  updated_at     DateTime           @updatedAt
   name           String?
   status         String?
-  isAdmin        Boolean           @default(false) @map("is_admin")
-  defaultAddress String?           @unique @map("default_address")
-  rewardAddress  String?           @unique @map("reward_address")
+  isAdmin        Boolean            @default(false) @map("is_admin")
+  defaultAddress String?            @unique @map("default_address")
+  rewardAddress  String?            @unique @map("reward_address")
   walletType     String?
   nonce          String?
-  email          String?           @unique
-  emailVerified  DateTime?         @map("email_verified")
+  email          String?            @unique
+  emailVerified  DateTime?          @map("email_verified")
   image          String?
-  sumsubId       String?           @map("sumsub_id")
-  sumsubType     String?           @map("sumsub_type")
-  sumsubResult   Json?             @map("sumsub_result")
-  sumsubStatus   String?           @map("sumsub_status")
+  sumsubId       String?            @map("sumsub_id")
+  sumsubType     String?            @map("sumsub_type")
+  sumsubResult   Json?              @map("sumsub_result")
+  sumsubStatus   String?            @map("sumsub_status")
   whitelists     WhitelistSignup[]
   accounts       Account[]
   sessions       Session[]
   transactions   Transaction[]
   wallets        Wallet[]
+  stakeHistory   UserStakeHistory[]
 
   @@map("users")
+}
+
+model UserStakeHistory {
+  id                  Int    @id @default(autoincrement())
+  active_epoch        Int
+  amount              String
+  pool_id             String
+  user_reward_address String
+  user                User   @relation(fields: [user_reward_address], references: [rewardAddress], onDelete: Cascade)
+
+  @@index([active_epoch, user_reward_address])
+  @@map("user_stake_history")
 }
 
 model VerificationToken {
@@ -101,71 +114,7 @@ model Transaction {
   @@map("transactions")
 }
 
-model SpoSignup {
-  id            String    @id @default(cuid())
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  name          String
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  signups       String[]
-
-  @@map("spo_signups")
-}
-
-model Stakepool {
-  id          Int             @id @default(autoincrement())
-  pool_id     String          @unique
-  hex         String?
-  url         String?
-  hash        String?
-  ticker      String?
-  name        String?
-  description String?
-  homepage    String?
-  stats       StakepoolStats?
-
-  @@map("stakepools")
-}
-
-model StakepoolStats {
-  id              Int       @id @default(autoincrement())
-  pool_id         String    @unique
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  hex             String
-  vrf_key         String
-  blocks_minted   Int
-  blocks_epoch    Int
-  live_stake      String
-  live_size       Float
-  live_saturation Float
-  live_delegators Int
-  active_stake    String
-  active_size     Float
-  declared_pledge String
-  live_pledge     String
-  margin_cost     Float
-  fixed_cost      String
-  reward_account  String
-  owners          String[]
-  registration    String[]
-  retirement      String[]
-  stakepool       Stakepool @relation(fields: [pool_id], references: [pool_id], onDelete: Cascade)
-
-  @@map("stakepool_stats")
-}
-
-model StakepoolDataCache {
-  id         Int      @id @default(autoincrement())
-  spoListKey String   @unique
-  data       Json
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@map("stakepool_cache")
-}
+// PROJECT /////////////////////////////////////////////////
 
 model Project {
   id               Int         @id @default(autoincrement())
@@ -187,7 +136,7 @@ model Project {
   team             Team[]
   tokenomics       Tokenomics?
   whitelists       Whitelist[]
-  fisoPoolIds      String[]    @map("fiso_pool_ids")
+  fisos            Fiso[]
 
   @@map("projects")
 }
@@ -256,6 +205,8 @@ model Tokenomic {
   @@map("project_tokenomics_items")
 }
 
+// WHITELIST //////////////////////////////////////////////
+
 model Whitelist {
   id            String            @id @default(cuid())
   created_at    DateTime          @default(now())
@@ -288,4 +239,122 @@ model WhitelistSignup {
   user_id         String
 
   @@map("whitelist_signups")
+}
+
+// STAKEPOOL, ISPO, AND FISO STUFF /////////////////////////////////////
+
+model Fiso {
+  id                 Int                     @id @default(autoincrement())
+  tokenAmount        Int                     @map("token_amount")
+  tokenName          String                  @map("token_name")
+  tokenTicker        String                  @map("token_ticker")
+  startEpoch         Int                     @map("start_epoch")
+  endEpoch           Int                     @map("end_epoch")
+  projectSlug        String                  @map("project_slug")
+  project            Project                 @relation(fields: [projectSlug], references: [slug])
+  approvedStakepools FisoApprovedStakePool[]
+  totalStakeEpoch    Json?                   @map("total_stake_epoch")
+  spoSignups         SpoSignups[]
+
+  @@map("fisos")
+}
+
+model FisoApprovedStakePool {
+  id         Int       @id @default(autoincrement())
+  startEpoch Int       @map("start_epoch")
+  endEpoch   Int       @map("end_epoch")
+  fisoId     Int       @map("fiso_id")
+  fiso       Fiso      @relation(fields: [fisoId], references: [id], onDelete: Cascade)
+  poolId     String    @map("pool_id")
+  stakepool  Stakepool @relation(fields: [poolId], references: [pool_id], onDelete: Cascade)
+
+  @@map("fiso_approved_stake_pools")
+}
+
+model SpoSignups {
+  id               String    @id @default(cuid())
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  poolId           String    @map("pool_id")
+  stakepool        Stakepool @relation(fields: [poolId], references: [pool_id], onDelete: Cascade)
+  fisos            Fiso[]
+  operatorName     String?   @map("operator_name")
+  operatorEmail    String?   @map("operator_email")
+  operatorTwitter  String?   @map("operator_twitter")
+  operatorDiscord  String?   @map("operator_discord")
+  operatorTelegram String?   @map("operator_telegram")
+
+  @@map("spo_signups")
+}
+
+model Stakepool {
+  id          Int                     @id @default(autoincrement())
+  pool_id     String                  @unique
+  hex         String?
+  url         String?
+  hash        String?
+  ticker      String?
+  name        String?
+  description String?
+  homepage    String?
+  stats       StakepoolStats?
+  history     StakepoolHistory[]
+  fisoPools   FisoApprovedStakePool[]
+  SpoSignups  SpoSignups[]
+
+  @@map("stakepools")
+}
+
+model StakepoolStats {
+  id              Int       @id @default(autoincrement())
+  pool_id         String    @unique
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  hex             String
+  vrf_key         String
+  blocks_minted   Int
+  blocks_epoch    Int
+  live_stake      String
+  live_size       Float
+  live_saturation Float
+  live_delegators Int
+  active_stake    String
+  active_size     Float
+  declared_pledge String
+  live_pledge     String
+  margin_cost     Float
+  fixed_cost      String
+  reward_account  String
+  owners          String[]
+  registration    String[]
+  retirement      String[]
+  stakepool       Stakepool @relation(fields: [pool_id], references: [pool_id], onDelete: Cascade)
+
+  @@map("stakepool_stats")
+}
+
+model StakepoolDataCache {
+  id         Int      @id @default(autoincrement())
+  spoListKey String   @unique
+  data       Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("stakepool_cache")
+}
+
+model StakepoolHistory {
+  id               Int       @id @default(autoincrement())
+  epoch            Int
+  blocks           Int
+  active_stake     String
+  active_size      Float
+  delegators_count Int
+  rewards          String
+  fees             String
+  stakepool        Stakepool @relation(fields: [pool_id], references: [pool_id], onDelete: Cascade)
+  pool_id          String
+
+  @@index([epoch, pool_id])
+  @@map("stakepool_history")
 }

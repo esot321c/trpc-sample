@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TFiso } from './fisoSchema';
 
 export {
   TProject,
@@ -86,7 +87,7 @@ const TProject = z.object({
   team: z.array(TTeam),
   tokenomics: TTokenomics,
   whitelists: z.array(TWhitelist),
-  fisoPoolIds: z.array(z.string())
+  fisos: z.array(TFiso)
 });
 
 

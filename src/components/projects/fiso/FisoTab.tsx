@@ -5,15 +5,15 @@ import { Alert, Collapse, Box, Typography, Paper, TextField, FilledInput } from 
 import { trpc } from '@lib/utils/trpc';
 import { useWalletContext } from '@contexts/WalletContext';
 import { stakepools } from '@lib/stakepools';
-import IspoFullCard from './IspoFullCard';
+import FisoFullCard from './FisoFullCard';
 import Grid from '@mui/system/Unstable_Grid/Grid';
 
-type IspoTabProps = {
+type FisoTabProps = {
   fisoPoolIds: string[]
   projectSlug: string;
 }
 
-const IspoTab: FC<IspoTabProps> = ({ fisoPoolIds, projectSlug }) => {
+const FisoTab: FC<FisoTabProps> = ({ fisoPoolIds, projectSlug }) => {
   const { sessionStatus } = useWalletContext()
   const stakepoolInfo = trpc.stakepool.stakepoolInfo.useMutation()
   const [stakepoolData, setStakepoolData] = useState<any>([])
@@ -48,7 +48,7 @@ const IspoTab: FC<IspoTabProps> = ({ fisoPoolIds, projectSlug }) => {
                 {stakepoolData.successfulStakePools.map((item: TFullStakePool, i: number) => {
                   return (
                     <Grid xs={12} sm={6} md={4} key={`ispo-card-${item.hex}`}>
-                      <IspoFullCard stakepoolData={item} projectSlug={projectSlug} />
+                      <FisoFullCard stakepoolData={item} projectSlug={projectSlug} />
                     </Grid>
                   )
                 })}
@@ -62,4 +62,4 @@ const IspoTab: FC<IspoTabProps> = ({ fisoPoolIds, projectSlug }) => {
   );
 };
 
-export default IspoTab;
+export default FisoTab;

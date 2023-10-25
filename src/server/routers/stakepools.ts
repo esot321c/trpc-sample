@@ -1,4 +1,5 @@
 import { prisma } from '@server/prisma';
+import { blockfrostAPI } from '@server/utils/blockfrostApi';
 import { fetchAndUpdateStakepoolData } from '@server/utils/fetchAndUpdateStakepoolData';
 import crypto from 'crypto';
 import { z } from 'zod';
@@ -67,4 +68,10 @@ export const stakepoolRouter = createTRPCRouter({
         return freshData;
       }
     }),
+  getCurrentEpoch: publicProcedure
+    .query(async () => {
+      const { data: currentEpochData } = await blockfrostAPI.get(`/epochs/latest`);
+      if (!currentEpochData) throw new Error("Unable to retrieve epoch data")
+      return currentEpochData
+    })
 });

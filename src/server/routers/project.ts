@@ -24,7 +24,6 @@ export const projectRouter = createTRPCRouter({
               avatarImgUrl: input.avatarImgUrl,
               isLaunched: input.isLaunched,
               isDraft: input.isDraft,
-              fisoPoolIds: input.fisoPoolIds,
               // Create the related records
               socials: { create: input.socials },
               roadmap: { create: input.roadmap },
@@ -41,6 +40,17 @@ export const projectRouter = createTRPCRouter({
                 },
               },
               whitelists: { create: input.whitelists },
+              fisos: {
+                create: input.fisos.map(fiso => ({
+                  ...fiso,
+                  approvedStakepools: {
+                    create: []
+                  },
+                  spoSignups: {
+                    create: []
+                  }
+                }))
+              },
             },
           });
 
@@ -78,10 +88,36 @@ export const projectRouter = createTRPCRouter({
           throw new Error("Project not found");
         }
 
+        // fiso logic left out, will fetch this separately
+
         const mappedProject = mapFullProjectFromDb(project)
 
         return mappedProject;
       }
       else return undefined
+    }),
+  getProjectFisos: publicProcedure
+    .input(z.object({
+      slug: z.string().nullish(),
+    }))
+    .query(async ({ input }) => {
+      if (input.slug) {
+        const fisos = await prisma.fiso.findMany({
+          where: {
+            projectSlug: input.slug,
+          },
+          include: {
+            approvedStakepools: true,
+            spoSignups: true
+          },
+        });
+
+        if (!fisos) {
+          throw new Error("No FISOs associated with this project");
+        }
+
+        return fisos;
+      }
+      else throw new Error("No project slug provided");
     }),
 })
