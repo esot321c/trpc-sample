@@ -2,7 +2,7 @@ import { prisma } from '@server/prisma';
 import { TRPCError } from '@trpc/server';
 import { blockfrostAPI } from './blockfrostApi';
 
-export const fetchAndUpdateStakepoolData = async (stakepoolIds: string[]) => {
+export const fetchAndUpdateStakepoolData = async (stakepoolIds: string[], includeSignups?: boolean) => {
   // Variables to store successful and unsuccessful stakepools
   const successfulStakePools = [];
   const errors = [];
@@ -52,7 +52,8 @@ export const fetchAndUpdateStakepoolData = async (stakepoolIds: string[]) => {
     }
   }
 
-  const tenMinutesAgo = new Date(Date.now() - 600000); // 10 minutes in milliseconds
+  const staleMinutes = 30
+  const timeAgo = new Date(Date.now() - (60000 * staleMinutes));
 
   for (const pool_id of normalizedPoolIds) {
     try {
@@ -60,7 +61,7 @@ export const fetchAndUpdateStakepoolData = async (stakepoolIds: string[]) => {
         where: { pool_id },
       });
 
-      if (!stats || stats.updated_at < tenMinutesAgo) {
+      if (!stats || stats.updated_at < timeAgo) {
         const { data: newStats } = await blockfrostAPI.get(`/pools/${pool_id}`);
 
         if (stats) {
@@ -88,7 +89,7 @@ export const fetchAndUpdateStakepoolData = async (stakepoolIds: string[]) => {
   }
 
   try {
-    const updatedStakePools = await prisma.stakepool.findMany({
+    const updatedStakePools: TStakePoolWithStats[] = (await prisma.stakepool.findMany({
       where: {
         pool_id: {
           in: normalizedPoolIds,
@@ -96,8 +97,47 @@ export const fetchAndUpdateStakepoolData = async (stakepoolIds: string[]) => {
       },
       include: {
         stats: true,
+        spoSignups: includeSignups ? {
+          include: {
+            fisos: true,
+          },
+        } : false,
       },
-    });
+    })).map(pool => ({
+      ...pool,
+      stats: {
+        id: pool.stats?.id || 0,
+        hex: pool.stats?.hex || '',
+        owners: pool.stats?.owners || [],
+        pool_id: pool.stats?.pool_id || '',
+        vrf_key: pool.stats?.vrf_key || '',
+        live_size: pool.stats?.live_size || 0,
+        created_at: pool.stats?.created_at || new Date(),
+        fixed_cost: pool.stats?.fixed_cost || '',
+        live_stake: pool.stats?.live_stake || '',
+        retirement: pool.stats?.retirement || [],
+        updated_at: pool.stats?.updated_at || new Date(),
+        active_size: pool.stats?.active_size || 0,
+        live_pledge: pool.stats?.live_pledge || '',
+        margin_cost: pool.stats?.margin_cost || 0,
+        active_stake: pool.stats?.active_stake || '',
+        blocks_epoch: pool.stats?.blocks_epoch || 0,
+        registration: pool.stats?.registration || [],
+        blocks_minted: pool.stats?.blocks_minted || 0,
+        reward_account: pool.stats?.reward_account || '',
+        declared_pledge: pool.stats?.declared_pledge || '',
+        live_delegators: pool.stats?.live_delegators || 0,
+        live_saturation: pool.stats?.live_saturation || 0,
+      },
+      hex: pool.hex ?? undefined,
+      url: pool.url ?? undefined,
+      hash: pool.hash ?? undefined,
+      ticker: pool.ticker ?? undefined,
+      name: pool.name ?? undefined,
+      description: pool.description ?? undefined,
+      homepage: pool.homepage ?? undefined,
+      spoSignups: pool.spoSignups ? pool.spoSignups as unknown as TSpoSignups : null,
+    }));;
 
     successfulStakePools.push(...updatedStakePools);
   } catch (error: any) {

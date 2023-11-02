@@ -14,19 +14,19 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FC, useEffect, useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import FileUploadS3 from '@components/FileUploadS3';
-import RoadmapInput from '@components/create-project/RoadmapInput';
-import TeamInput from '@components/create-project/TeamInput';
-import TokenomicInput from '@components/create-project/TokenomicInput';
+import RoadmapInput from '@components/admin/create-project/RoadmapInput';
+import TeamInput from '@components/admin/create-project/TeamInput';
+import TokenomicInput from '@components/admin/create-project/TokenomicInput';
 import { NextPage } from 'next';
 import { slugify } from '@lib/utils/general';
-import MarkdownTextArea from '@components/create-project/MarkdownTextArea';
+import MarkdownTextArea from '@components/admin/create-project/MarkdownTextArea';
 import ProjectCard from '@components/projects/ProjectCard';
-import WhitelistInput from '@components/create-project/WhitelistInput';
+import WhitelistInput from '@components/admin/create-project/WhitelistInput';
 import { trpc } from '@lib/utils/trpc';
-import FisoInput from '@components/create-project/FisoInput';
+import FisoInput from '@components/admin/create-project/FisoInput';
 import AdminMenu from '@components/AdminMenu';
 
 const socials = ['telegram', 'discord', 'github', 'twitter', 'website', 'linkedin'];
@@ -70,7 +70,7 @@ const initialFormErrors = {
   bannerImgUrl: false,
 }
 
-const CreateProjectForm: NextPage = () => {
+const CreateProjectForm: FC = () => {
   const theme = useTheme()
   const submitNewProject = trpc.project.createProject.useMutation()
 
@@ -311,7 +311,7 @@ const CreateProjectForm: NextPage = () => {
 
   return (
     <AdminMenu>
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit} maxWidth="md">
         <Typography variant="h2" sx={{ mt: 10, mb: 4, fontWeight: '700' }}>
           Create Project
         </Typography>

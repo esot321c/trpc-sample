@@ -106,28 +106,44 @@ const WhitelistCard: FC<WhitelistCardProps> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <Grid xs={12} md={5}>
+          <Grid xs={12} md>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: { xs: 'center', md: 'flex-start' } }}>
               <Typography variant="h5">
                 {name}
               </Typography>
-
-              {dateStatus === 'countdown'
-                ? <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-                  <Typography component="span">Starts in&nbsp;</Typography>
-                  <TimeRemaining endTime={startDateTime} />
-                </Box>
-                : dateStatus === 'started'
-                  ? <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-                    <TimeRemaining endTime={endDateTime} />
-                    <Typography component="span">&nbsp;remaining</Typography>
-                  </Box>
-                  : 'This round is closed'}
+            </Box>
+          </Grid>
+          <Grid xs={12} md>
+            <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                fontSize: '20px!important',
+                alignItems: 'center',
+                '& .MuiTypography-root': {
+                  fontSize: '20px!important',
+                }
+              }}>
+                {dateStatus === 'countdown'
+                  ? <>
+                    <Typography component="span">Opens in&nbsp;</Typography>
+                    <TimeRemaining endTime={startDateTime} />
+                  </>
+                  : dateStatus === 'started'
+                    ? <>
+                      <Typography component="span">Closes in&nbsp;</Typography>
+                      <TimeRemaining endTime={endDateTime} />
+                    </>
+                    : dateStatus === 'ended'
+                      ? <Typography>This round is closed</Typography>
+                      : <Typography>Loading...</Typography>}
+              </Box>
             </Box>
           </Grid>
           {externalLink
             ? (
-              <Grid xs={12} md={7} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
+              <Grid xs={12} md sx={{ textAlign: { xs: 'center', md: 'right' } }}>
                 <Button
                   variant="contained"
                   disabled={dateStatus !== 'started' || contributionAmountError}
@@ -144,10 +160,10 @@ const WhitelistCard: FC<WhitelistCardProps> = ({
                   Go to whitelist
                 </Button>
               </Grid>
-            ) :
-            getUserWhitelistSignups.data?.data
+            )
+            : getUserWhitelistSignups.data?.data
               && getUserWhitelistSignups.data?.data.includes(slug) ? (
-              <Grid xs={12} md={7} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
+              <Grid xs={12} md sx={{ textAlign: { xs: 'center', md: 'right' } }}>
                 <Button
                   variant="contained"
                   disabled
@@ -164,57 +180,37 @@ const WhitelistCard: FC<WhitelistCardProps> = ({
               </Grid>
             )
               : (
-                <>
-                  <Grid xs={12} md={4}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center' }}>
-                      <Typography>
-                        Amount requested in USD:
-                      </Typography>
-                      <TextFieldWithButton
-                        id="amount-requested"
-                        secondaryColor
-                        error={contributionAmountError}
-                        helperText={contributionAmountError
-                          && `Please reduce below $${maxPerSignup?.toLocaleString()}`}
-                        buttonText="Max"
-                        buttonFunction={() => setMaxAmount()}
-                        value={contributionAmount}
-                        onChange={handleChangeContributionAmount}
-                      />
-                    </Box>
-                  </Grid>
-                  <Grid xs={12} md={3} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
-                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                      <Button
-                        variant="contained"
-                        disabled={dateStatus !== 'started' || contributionAmountError || buttonLoading}
-                        color="secondary"
-                        onClick={handleSubmit}
+                <Grid xs={12} md sx={{ textAlign: { xs: 'center', md: 'right' } }}>
+                  <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                    <Button
+                      variant="contained"
+                      disabled={dateStatus !== 'started' || contributionAmountError || buttonLoading}
+                      color="secondary"
+                      onClick={handleSubmit}
+                      sx={{
+                        textTransform: 'none',
+                        fontSize: '20px',
+                        fontWeight: 600,
+                        borderRadius: '12px'
+                      }}
+                    >
+                      Submit Whitelist
+                    </Button>
+                    {buttonLoading &&
+                      <Box
                         sx={{
-                          textTransform: 'none',
-                          fontSize: '20px',
-                          fontWeight: 600,
-                          borderRadius: '12px'
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          height: '30px'
                         }}
                       >
-                        Submit Whitelist
-                      </Button>
-                      {buttonLoading &&
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            height: '30px'
-                          }}
-                        >
-                          <CircularProgress size={30} />
-                        </Box>
-                      }
-                    </Box>
-                  </Grid>
-                </>
+                        <CircularProgress size={30} />
+                      </Box>
+                    }
+                  </Box>
+                </Grid>
               )}
 
         </Grid>

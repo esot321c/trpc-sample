@@ -8,16 +8,17 @@ import { formatDateForInput } from '@lib/utils/daytime';
 interface IWhitelistInputProps {
   data: TWhitelist[];
   setData: (updatedData: TWhitelist[]) => void;
+  projectSlug: string;
 }
 
-const WhitelistInput: FC<IWhitelistInputProps> = ({ data, setData }) => {
+const WhitelistInput: FC<IWhitelistInputProps> = ({ data, setData, projectSlug }) => {
   const handleChange = (e: any, index: number) => {
     const updatedData = data.map((elem, i) => {
       if (index === i && e.target.name === 'name') {
         return {
           ...elem,
           [e.target.name]: e.target.value,
-          slug: slugify(e.target.value)
+          slug: slugify(`${projectSlug}-${e.target.value}`)
         };
       } else if (index === i) {
         return {

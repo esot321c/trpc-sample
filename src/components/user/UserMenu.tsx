@@ -285,7 +285,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           >
-            <MenuItem
+            {/* <MenuItem
               sx={{ mt: '6px' }}
               onClick={() => router.push('/users/' + wallet.getChangeAddress)}
             >
@@ -303,7 +303,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
                 <AccountBalanceWalletIcon fontSize="small" />
               </ListItemIcon>
               Change Wallet
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={() => {
               cleanup()
               setProviderLoading(true)

@@ -5,6 +5,17 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
+export type TStakepoolInfoReturn = {
+  successfulStakePools: TStakePoolWithStats[];
+  errors: ({
+    identifier: string;
+    error: any;
+  } | {
+    pool_id: any;
+    error: any;
+  })[]
+}
+
 export const stakepoolRouter = createTRPCRouter({
   stakepoolInfo: publicProcedure
     .input(z.object({
@@ -24,7 +35,7 @@ export const stakepoolRouter = createTRPCRouter({
       if (cachedData) {
         if (cachedData.updatedAt > staleTime) {
           // If valid cache exists and it's not stale, return the cached data
-          return cachedData.data;
+          return cachedData.data as unknown as TStakepoolInfoReturn;
         } else {
           // Cache is stale. Mark it as "being updated" by setting the updatedAt timestamp.
           await prisma.stakepoolDataCache.update({
@@ -46,7 +57,7 @@ export const stakepoolRouter = createTRPCRouter({
           });
 
           // Return the stale data immediately (since await wasn't used)
-          return cachedData.data;
+          return cachedData.data as unknown as TStakepoolInfoReturn
         }
       } else {
         // If no cache exists, fetch new data, wait for it, update the cache, and return the data
@@ -65,8 +76,28 @@ export const stakepoolRouter = createTRPCRouter({
             updatedAt: new Date(),
           },
         });
-        return freshData;
+        return freshData as TStakepoolInfoReturn;
       }
+    }),
+  getStakepoolsWithFiso: publicProcedure
+    .input(z.object({
+      stakepoolIds: z.array(z.string())
+    }))
+    .query(async ({ input }) => {
+      const { stakepoolIds } = input;
+
+      const stakepools = await prisma.stakepool.findMany({
+        where: {
+          pool_id: {
+            in: stakepoolIds,
+          },
+        },
+        include: {
+          fisoPools: true
+        }
+      });
+
+      return stakepools;
     }),
   getCurrentEpoch: publicProcedure
     .query(async () => {

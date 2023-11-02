@@ -27,6 +27,8 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
 import ProjectCard from '@components/projects/ProjectCard';
+import { trpc } from '@lib/utils/trpc';
+import { slugify } from '@lib/utils/general';
 
 SwiperCore.use([Navigation]);
 
@@ -42,20 +44,27 @@ const Projects: FC<IProjectsProps> = ({ }) => {
   const theme = useTheme()
   const upMd = useMediaQuery(theme.breakpoints.up('md'))
   const swiperRef = useRef<ExtendedSwiperRef | null>(null);
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<IProjectDetails[]>([]);
+  const { data: projectList } = trpc.project.getProjectList.useQuery({});
 
   useEffect(() => {
-    const getProjects = async () => {
-      try {
-        const res = await axios.get(`${process.env.API_URL}/projects/`);
-        setProjects(res.data.filter((project: TProject) => project.name.toLowerCase().startsWith('cardano-')))
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    getProjects();
-  }, []);
+    if (projectList) {
+      setProjects(
+        projectList.filter(project => project.frontPage).map((item) => {
+          const details: IProjectDetails = {
+            title: item.name,
+            tagline: item.shortDescription,
+            category: '',
+            imageUrl: item.bannerImgUrl,
+            status: item.isLaunched
+              ? "Complete"
+              : "Upcoming", // 'In Progress', 'Complete'
+            blockchains: item.blockchains
+          }
+          return (details)
+        }))
+    }
+  }, [projectList]);
 
   const handlePrev = () => {
     if (swiperRef.current) {
@@ -133,28 +142,11 @@ const Projects: FC<IProjectsProps> = ({ }) => {
                   modules={[Grid, Pagination, Navigation, Autoplay]}
                   className="mySwiper"
                 >
-                  {projects.map((item: TProject, i) => {
-                    const uuid = uuidv4()
-                    const projectName = item.name.replace(/cardano-(x-)?/, "")
-                    const category = item.fundsRaised === 9090
-                      ? "Launchpad"
-                      : "IDO"
-                    const details = {
-                      title: projectName,
-                      tagline: item.shortDescription,
-                      imageUrl: item.bannerImgUrl,
-                      category: category,
-                      status: item.isLaunched
-                        ? "Complete"
-                        : "Upcoming", // 'In Progress', 'Complete'
-                      blockchains: item.name.includes("cardano-x-")
-                        ? ['Cardano', 'Ergo']
-                        : ['Cardano']
-                    }
-
+                  {projects.map((item: IProjectDetails) => {
+                    const slug = slugify(item.title)
                     return (
-                      <SwiperSlide key={uuid}>
-                        <ProjectCard {...details} link={`/projects/${projectName.toLowerCase().replace(/[\s-]/g, "")}`} />
+                      <SwiperSlide key={slug}>
+                        <ProjectCard {...item} link={`/projects/${item.title.toLowerCase().replace(/[\s-]/g, "")}`} />
                       </SwiperSlide>
                     )
                   })}

@@ -10,6 +10,7 @@ import {
   Chip,
 } from '@mui/material'
 import { v4 as uuidv4 } from 'uuid';
+import { useRouter } from 'next/router';
 
 interface IProjectCard {
   title: string;
@@ -30,6 +31,7 @@ const ProjectCard: FC<IProjectCard> = ({
   blockchains,
   link
 }) => {
+  const router = useRouter()
   return (
     <Card sx={{ maxWidth: '560px' }}>
       <CardMedia
@@ -61,7 +63,7 @@ const ProjectCard: FC<IProjectCard> = ({
             })}
           </MuiGrid>
           <MuiGrid item>
-            <Button href={link} variant="contained" color="secondary" size="small">
+            <Button onClick={() => router.push(link)} variant="contained" color="secondary" size="small">
               Learn More
             </Button>
           </MuiGrid>

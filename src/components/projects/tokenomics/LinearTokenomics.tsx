@@ -1,18 +1,27 @@
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
+import { LinearProgressStyled } from '@components/styled-components/LinearProgress';
 import React, { FC } from 'react';
+import { useTheme } from '@mui/material';
 
 function LinearProgressWithLabel(props: any) {
+  const theme = useTheme()
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Box sx={{ width: '100%', mr: 1 }}>
-        <LinearProgress variant="determinate" {...props} />
+        <LinearProgressStyled
+          variant="determinate"
+          barColorStart={theme.palette.secondary.main}
+          barColorEnd={theme.palette.secondary.light}
+          {...props}
+        />
       </Box>
       <Box sx={{ minWidth: 35 }}>
-        <Typography variant="body2" color="text.secondary">{`${Math.round(
-          props.value
-        )}%`}</Typography>
+        <Typography color="text.secondary">
+          {`${Math.round(
+            props.value
+          )}%`}
+        </Typography>
       </Box>
     </Box>
   );

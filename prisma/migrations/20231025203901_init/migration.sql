@@ -51,6 +51,17 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "user_stake_history" (
+    "id" SERIAL NOT NULL,
+    "active_epoch" INTEGER NOT NULL,
+    "amount" TEXT NOT NULL,
+    "pool_id" TEXT NOT NULL,
+    "user_reward_address" TEXT NOT NULL,
+
+    CONSTRAINT "user_stake_history_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "verificationtokens" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
@@ -86,74 +97,6 @@ CREATE TABLE "transactions" (
 );
 
 -- CreateTable
-CREATE TABLE "spo_signups" (
-    "id" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-    "name" TEXT NOT NULL,
-    "email" TEXT,
-    "email_verified" TIMESTAMP(3),
-    "image" TEXT,
-    "signups" TEXT[],
-
-    CONSTRAINT "spo_signups_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "stakepools" (
-    "id" SERIAL NOT NULL,
-    "pool_id" TEXT NOT NULL,
-    "hex" TEXT,
-    "url" TEXT,
-    "hash" TEXT,
-    "ticker" TEXT,
-    "name" TEXT,
-    "description" TEXT,
-    "homepage" TEXT,
-
-    CONSTRAINT "stakepools_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "stakepool_stats" (
-    "id" SERIAL NOT NULL,
-    "pool_id" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-    "hex" TEXT NOT NULL,
-    "vrf_key" TEXT NOT NULL,
-    "blocks_minted" INTEGER NOT NULL,
-    "blocks_epoch" INTEGER NOT NULL,
-    "live_stake" TEXT NOT NULL,
-    "live_size" DOUBLE PRECISION NOT NULL,
-    "live_saturation" DOUBLE PRECISION NOT NULL,
-    "live_delegators" INTEGER NOT NULL,
-    "active_stake" TEXT NOT NULL,
-    "active_size" DOUBLE PRECISION NOT NULL,
-    "declared_pledge" TEXT NOT NULL,
-    "live_pledge" TEXT NOT NULL,
-    "margin_cost" DOUBLE PRECISION NOT NULL,
-    "fixed_cost" TEXT NOT NULL,
-    "reward_account" TEXT NOT NULL,
-    "owners" TEXT[],
-    "registration" TEXT[],
-    "retirement" TEXT[],
-
-    CONSTRAINT "stakepool_stats_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "stakepool_cache" (
-    "id" SERIAL NOT NULL,
-    "spoListKey" TEXT NOT NULL,
-    "data" JSONB NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "stakepool_cache_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "projects" (
     "id" SERIAL NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -169,7 +112,6 @@ CREATE TABLE "projects" (
     "avatar_img_url" TEXT NOT NULL,
     "is_launched" BOOLEAN NOT NULL,
     "is_draft" BOOLEAN NOT NULL,
-    "fiso_pool_ids" TEXT[],
 
     CONSTRAINT "projects_pkey" PRIMARY KEY ("id")
 );
@@ -269,6 +211,121 @@ CREATE TABLE "whitelist_signups" (
     CONSTRAINT "whitelist_signups_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "fisos" (
+    "id" SERIAL NOT NULL,
+    "token_amount" INTEGER NOT NULL,
+    "token_name" TEXT NOT NULL,
+    "token_ticker" TEXT NOT NULL,
+    "start_epoch" INTEGER NOT NULL,
+    "end_epoch" INTEGER NOT NULL,
+    "project_slug" TEXT NOT NULL,
+    "total_stake_epoch" JSONB,
+
+    CONSTRAINT "fisos_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "fiso_approved_stake_pools" (
+    "id" SERIAL NOT NULL,
+    "start_epoch" INTEGER NOT NULL,
+    "end_epoch" INTEGER NOT NULL,
+    "fiso_id" INTEGER NOT NULL,
+    "pool_id" TEXT NOT NULL,
+
+    CONSTRAINT "fiso_approved_stake_pools_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "spo_signups" (
+    "id" SERIAL NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "pool_id" TEXT NOT NULL,
+    "operator_name" TEXT,
+    "operator_email" TEXT,
+    "operator_twitter" TEXT,
+    "operator_discord" TEXT,
+    "operator_telegram" TEXT,
+
+    CONSTRAINT "spo_signups_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stakepools" (
+    "id" SERIAL NOT NULL,
+    "pool_id" TEXT NOT NULL,
+    "hex" TEXT,
+    "url" TEXT,
+    "hash" TEXT,
+    "ticker" TEXT,
+    "name" TEXT,
+    "description" TEXT,
+    "homepage" TEXT,
+
+    CONSTRAINT "stakepools_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stakepool_stats" (
+    "id" SERIAL NOT NULL,
+    "pool_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "hex" TEXT NOT NULL,
+    "vrf_key" TEXT NOT NULL,
+    "blocks_minted" INTEGER NOT NULL,
+    "blocks_epoch" INTEGER NOT NULL,
+    "live_stake" TEXT NOT NULL,
+    "live_size" DOUBLE PRECISION NOT NULL,
+    "live_saturation" DOUBLE PRECISION NOT NULL,
+    "live_delegators" INTEGER NOT NULL,
+    "active_stake" TEXT NOT NULL,
+    "active_size" DOUBLE PRECISION NOT NULL,
+    "declared_pledge" TEXT NOT NULL,
+    "live_pledge" TEXT NOT NULL,
+    "margin_cost" DOUBLE PRECISION NOT NULL,
+    "fixed_cost" TEXT NOT NULL,
+    "reward_account" TEXT NOT NULL,
+    "owners" TEXT[],
+    "registration" TEXT[],
+    "retirement" TEXT[],
+
+    CONSTRAINT "stakepool_stats_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stakepool_cache" (
+    "id" SERIAL NOT NULL,
+    "spoListKey" TEXT NOT NULL,
+    "data" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "stakepool_cache_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stakepool_history" (
+    "id" SERIAL NOT NULL,
+    "epoch" INTEGER NOT NULL,
+    "blocks" INTEGER NOT NULL,
+    "active_stake" TEXT NOT NULL,
+    "active_size" DOUBLE PRECISION NOT NULL,
+    "delegators_count" INTEGER NOT NULL,
+    "rewards" TEXT NOT NULL,
+    "fees" TEXT NOT NULL,
+    "pool_id" TEXT NOT NULL,
+
+    CONSTRAINT "stakepool_history_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_FisoToSpoSignups" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "accounts_provider_provider_account_id_key" ON "accounts"("provider", "provider_account_id");
 
@@ -285,6 +342,9 @@ CREATE UNIQUE INDEX "users_reward_address_key" ON "users"("reward_address");
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE INDEX "user_stake_history_active_epoch_user_reward_address_idx" ON "user_stake_history"("active_epoch", "user_reward_address");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "verificationtokens_token_key" ON "verificationtokens"("token");
 
 -- CreateIndex
@@ -295,18 +355,6 @@ CREATE UNIQUE INDEX "wallets_reward_address_key" ON "wallets"("reward_address");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "wallets_change_address_key" ON "wallets"("change_address");
-
--- CreateIndex
-CREATE UNIQUE INDEX "spo_signups_email_key" ON "spo_signups"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "stakepools_pool_id_key" ON "stakepools"("pool_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "stakepool_stats_pool_id_key" ON "stakepool_stats"("pool_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "stakepool_cache_spoListKey_key" ON "stakepool_cache"("spoListKey");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "projects_name_key" ON "projects"("name");
@@ -326,6 +374,27 @@ CREATE UNIQUE INDEX "whitelists_name_key" ON "whitelists"("name");
 -- CreateIndex
 CREATE UNIQUE INDEX "whitelists_slug_key" ON "whitelists"("slug");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "spo_signups_pool_id_key" ON "spo_signups"("pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stakepools_pool_id_key" ON "stakepools"("pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stakepool_stats_pool_id_key" ON "stakepool_stats"("pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stakepool_cache_spoListKey_key" ON "stakepool_cache"("spoListKey");
+
+-- CreateIndex
+CREATE INDEX "stakepool_history_epoch_pool_id_idx" ON "stakepool_history"("epoch", "pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_FisoToSpoSignups_AB_unique" ON "_FisoToSpoSignups"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_FisoToSpoSignups_B_index" ON "_FisoToSpoSignups"("B");
+
 -- AddForeignKey
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -333,13 +402,13 @@ ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "user_stake_history" ADD CONSTRAINT "user_stake_history_user_reward_address_fkey" FOREIGN KEY ("user_reward_address") REFERENCES "users"("reward_address") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "wallets" ADD CONSTRAINT "wallets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "stakepool_stats" ADD CONSTRAINT "stakepool_stats_pool_id_fkey" FOREIGN KEY ("pool_id") REFERENCES "stakepools"("pool_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "project_socials" ADD CONSTRAINT "project_socials_project_slug_fkey" FOREIGN KEY ("project_slug") REFERENCES "projects"("slug") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -364,3 +433,27 @@ ALTER TABLE "whitelist_signups" ADD CONSTRAINT "whitelist_signups_whitelist_slug
 
 -- AddForeignKey
 ALTER TABLE "whitelist_signups" ADD CONSTRAINT "whitelist_signups_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "fisos" ADD CONSTRAINT "fisos_project_slug_fkey" FOREIGN KEY ("project_slug") REFERENCES "projects"("slug") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "fiso_approved_stake_pools" ADD CONSTRAINT "fiso_approved_stake_pools_fiso_id_fkey" FOREIGN KEY ("fiso_id") REFERENCES "fisos"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "fiso_approved_stake_pools" ADD CONSTRAINT "fiso_approved_stake_pools_pool_id_fkey" FOREIGN KEY ("pool_id") REFERENCES "stakepools"("pool_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "spo_signups" ADD CONSTRAINT "spo_signups_pool_id_fkey" FOREIGN KEY ("pool_id") REFERENCES "stakepools"("pool_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stakepool_stats" ADD CONSTRAINT "stakepool_stats_pool_id_fkey" FOREIGN KEY ("pool_id") REFERENCES "stakepools"("pool_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stakepool_history" ADD CONSTRAINT "stakepool_history_pool_id_fkey" FOREIGN KEY ("pool_id") REFERENCES "stakepools"("pool_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_FisoToSpoSignups" ADD CONSTRAINT "_FisoToSpoSignups_A_fkey" FOREIGN KEY ("A") REFERENCES "fisos"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_FisoToSpoSignups" ADD CONSTRAINT "_FisoToSpoSignups_B_fkey" FOREIGN KEY ("B") REFERENCES "spo_signups"("id") ON DELETE CASCADE ON UPDATE CASCADE;

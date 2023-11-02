@@ -16,7 +16,6 @@ import {
   encode
 } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GithubProvider from 'next-auth/providers/github';
 
 type Credentials = {
   nonce: string;
@@ -58,10 +57,10 @@ export const authOptions = (
   async function signUser(user: User, credentials: Credentials): Promise<User | null> {
     const walletParse: ParsedWallet = JSON.parse(credentials.wallet)
     const signatureParse = JSON.parse(credentials.signature)
-    // console.log('Signed Message: ' + signatureParse.signedMessage)
-    // console.log('Proof: ' + signatureParse.proof)
-    // console.log('Signature: ' + signatureParse)
-    // console.log('Wallet: ' + walletParse)
+    console.log('Signed Message: ' + signatureParse.signedMessage)
+    console.log('Proof: ' + signatureParse.proof)
+    console.log('Signature: ' + signatureParse)
+    console.log('Wallet: ' + walletParse)
 
     // const signedMessageSplit = signatureParse.signedMessage.split(";");
     // const nonce = signedMessageSplit[0];
@@ -105,8 +104,7 @@ export const authOptions = (
     // const signedMessageSplit = signatureParse.signedMessage.split(";");
     // const nonce = signedMessageSplit[0];
     // const url = signedMessageSplit[1];
-    // // console.log('\x1b[32m', 'Nonce: ', '\x1b[0m', nonce);
-    // // console.log('\x1b[32m', 'URL: ', '\x1b[0m', url);
+    console.log('\x1b[32m', 'Nonce: ', '\x1b[0m', nonce);
     // if (nonce !== user.nonce) {
     //   console.error(`Nonce doesn't match`)
     //   throw new Error(`Nonce doesn't match`)
@@ -184,10 +182,6 @@ export const authOptions = (
   return {
     adapter: PrismaAdapter(prisma),
     providers: [
-      GithubProvider({
-        clientId: process.env.GITHUB_CLIENT_ID!,
-        clientSecret: process.env.GITHUB_SECRET_ID!
-      }),
       CredentialsProvider({
         name: 'credentials',
         credentials: {

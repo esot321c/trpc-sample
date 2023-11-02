@@ -1,46 +1,67 @@
 import React, { FC, useState } from 'react';
-import { Alert, Collapse, Box, Typography } from '@mui/material';
+import { Collapse, Box, Typography, useTheme } from '@mui/material';
 import { trpc } from '@lib/utils/trpc';
 import { useWalletContext } from '@contexts/WalletContext';
-import { calculatePageRange } from '@server/utils/userRewardsIspo';
+import { calculatePageRange } from '@server/utils/userRewardsFiso';
+import { ContainedTab, ContainedTabs } from '@components/styled-components/ContainedTabs';
+import TimeRemaining from '@components/TimeRemaining';
+import { LinearProgressStyled } from '@components/styled-components/LinearProgress';
+import ProRataForm from './ProRataForm';
 
 type ContributeTabProps = {
 
 }
 
+// phase tabs
+
+// total raise, open timer, close timer
+
+// progress bar
+
+// details: 
+//   - target
+//   - amount deposited
+//   - amoutn of tokens claimed
+//   - tokenomics info
+//   - price summary
+
+// individual user's details
+//   - my amount deposited
+//   - my percent share of the total
+//   - if its a pool-weight, my pool weight
+//   - my guaranteed allocation
+
+// contribute
+//   - terms and conditions
+//   - amount available in your wallet
+//   - amount to deposit
+//   - amount of token you'll get
+//   - deposit button
+//   - bonus? 
+
 const ContributeTab: FC<ContributeTabProps> = () => {
-  const { providerLoading, setProviderLoading, sessionStatus, sessionData, fetchSessionData } = useWalletContext()
-  const checkVerificationResult = trpc.user.getSumsubResult.useQuery()
-
-
-  // Example usage:
-  const strategy1 = calculatePageRange(12, 21, 100);
-  const strategy2 = calculatePageRange(27, 67, 412);
-  const strategy3 = calculatePageRange(27, 67, 620);
-  const strategy4 = calculatePageRange(450, 650, 620);
-
-
+  const theme = useTheme()
+  const [tabValue, setTabValue] = useState(0)
+  const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   return (
-    <>
-      <Typography>
-        Contribute
-      </Typography>
-      <Typography>
-        {JSON.stringify(strategy1)}
-      </Typography>
-      <Typography>
-        {JSON.stringify(strategy2)}
-      </Typography>
-      <Typography>
-        {JSON.stringify(strategy3)}
-      </Typography>
-      <Typography>
-        {JSON.stringify(strategy4)}
-      </Typography>
+    <Box sx={{ mb: 2 }}>
+      <ContainedTabs
+        value={tabValue}
+        onChange={handleChangeTab}
+        aria-label="styled tabs example"
+      >
+        <ContainedTab label="Public Round" />
+        <ContainedTab label="Ergopad Stakers Round" />
+      </ContainedTabs>
+      <Box sx={{ my: 2 }}>
 
-
-    </>
+        {tabValue === 0 && <ProRataForm />}
+        {tabValue === 1 && <Box sx={{ p: 3 }}>Item Two Content</Box>}
+      </Box>
+    </Box>
   );
 };
 

@@ -27,6 +27,7 @@ import ContributeTab from "@components/projects/contribute/ContributeTab";
 import ProjectInfoTab from "@components/projects/info/ProjectInfoTab";
 import { trpc } from '@lib/utils/trpc';
 import FisoTab from "@components/projects/fiso/FisoTab";
+import { mapFisoObject } from "@server/utils/mapProjectObject";
 
 type TTabs = 'summary' | 'tokenomics' | 'whitelist' | 'contribute' | 'fiso'
 
@@ -38,11 +39,11 @@ const Project = () => {
   const [projectData, setProjectData] = useState<TProject | undefined>(undefined)
   const [isLoading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState<TTabs>('summary');
-  const [fisoPoolIds, setFisoPoolIds] = useState<string[]>([])
+  const [fisoData, setFisoData] = useState<TFiso[]>([])
 
   const project = trpc.project.getProject.useQuery(
     { slug: project_slug?.toString() },
-    { enabled: project_slug !== undefined }
+    { enabled: project_slug !== undefined, retry: 0 }
   )
   const fisos = trpc.project.getProjectFisos.useQuery(
     { slug: project_slug?.toString() },
@@ -53,9 +54,10 @@ const Project = () => {
     if (fisos.isError) {
       console.log('error getting project fisos')
     }
-    // 
-    if (fisos.status === 'success' && fisos.data[0]?.approvedStakepools?.length > 0) {
-      setFisoPoolIds(fisos.data[0].approvedStakepools.map(stakepool => stakepool.poolId))
+
+    if (fisos.status === 'success' && fisos.data) {
+      const fisoObject = mapFisoObject(fisos.data)
+      setFisoData(fisoObject)
     }
   }, [fisos.status])
 
@@ -67,7 +69,7 @@ const Project = () => {
   }, [tab]);
 
   const isTTabs = (value: string): value is TTabs => {
-    return ['summary', 'tokenomics', 'whitelist', 'contribute', 'ispo'].includes(value);
+    return ['summary', 'tokenomics', 'whitelist', 'contribute', 'fiso'].includes(value);
   }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: TTabs) => {
@@ -100,17 +102,17 @@ const Project = () => {
 
   return (
     <>
-      {project.status === 'loading'
-        ? <Container sx={{ mb: "3rem" }}>
-          <CircularProgress color="inherit" sx={{
+      {project.status === 'loading' || !projectData && project.status !== 'error'
+        ? <Box sx={{ mb: 3, position: 'relative', height: '100vh', width: '100vw' }}>
+          <Box sx={{
             position: "absolute",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)"
-          }} />
-        </Container>
-        : projectData
-          ? <Container maxWidth="lg" sx={{ pt: 6 }}>
+          }}>Loading project...</Box>
+        </Box>
+        : projectData ?
+          <Container maxWidth="lg" sx={{ pt: 6 }}>
             <Grid container spacing={2} direction={upMd ? 'row' : 'column'} alignItems="center" sx={{ mb: 2 }}>
               <Grid item md='auto' sx={{ textAlign: 'center' }}>
                 <Avatar
@@ -176,6 +178,7 @@ const Project = () => {
               value={tabValue}
               onChange={handleTabChange}
               scrollButtons="auto"
+              allowScrollButtonsMobile
               variant="scrollable"
               sx={{
                 '& .MuiTabs-flexContainer': {
@@ -183,21 +186,21 @@ const Project = () => {
                 },
               }}
             >
-              <Tab label="Summary" value={'summary'}></Tab>
-              <Tab label="Tokenomics" value={'tokenomics'}></Tab>
-              <Tab label="Whitelist" value={'whitelist'}></Tab>
-              <Tab label="Contribute" value={'contribute'}></Tab>
-              {fisoPoolIds.length > 0 && <Tab label="FISO" value={'fiso'}></Tab>}
+              <Tab label="Summary" value={'summary'} />
+              <Tab label="Tokenomics" value={'tokenomics'} />
+              <Tab label="Whitelist" value={'whitelist'} />
+              <Tab label="Contribute" value={'contribute'} />
+              {fisoData.length > 0 && <Tab label="FISO" value={'fiso'} />}
             </Tabs>
             <Box sx={{ mb: 12, mt: 2 }}>
               {tabValue === 'summary' && <ProjectInfoTab project={projectData} />}
               {tabValue === 'tokenomics' && <TokenomicsTab tokenomics={projectData.tokenomics} />}
               {tabValue === 'whitelist' && <WhitelistTab whitelists={projectData.whitelists} projectSlug={projectData.slug} />}
               {tabValue === 'contribute' && <ContributeTab />}
-              {tabValue === 'fiso' && <FisoTab projectSlug={projectData.slug} fisoPoolIds={fisoPoolIds} />}
+              {tabValue === 'fiso' && <FisoTab projectSlug={projectData.slug} fisos={fisoData} />}
             </Box>
           </Container >
-          : <Container sx={{ textAlign: 'center', py: '20vh' }}>
+          : project.status === 'error' && <Container sx={{ textAlign: 'center', py: '20vh' }}>
             <Typography variant="h1">
               404
             </Typography>
@@ -210,8 +213,7 @@ const Project = () => {
             <Link href="/projects">
               Back to projects page
             </Link>
-          </Container>
-      }
+          </Container>}
     </>
   );
 };

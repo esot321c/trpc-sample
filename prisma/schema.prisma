@@ -73,7 +73,8 @@ model UserStakeHistory {
   user_reward_address String
   user                User   @relation(fields: [user_reward_address], references: [rewardAddress], onDelete: Cascade)
 
-  @@index([active_epoch, user_reward_address])
+  @@unique([active_epoch, user_reward_address, pool_id])
+  @@index([active_epoch, user_reward_address, pool_id])
   @@map("user_stake_history")
 }
 
@@ -129,8 +130,9 @@ model Project {
   fundsRaised      Int?        @map("funds_raised")
   bannerImgUrl     String      @map("banner_img_url")
   avatarImgUrl     String      @map("avatar_img_url")
-  isLaunched       Boolean     @map("is_launched")
-  isDraft          Boolean     @map("is_draft")
+  isLaunched       Boolean     @default(false) @map("is_launched")
+  isDraft          Boolean     @default(true) @map("is_draft")
+  frontPage        Boolean     @default(false) @map("front_page")
   socials          Socials?
   roadmap          Roadmap[]
   team             Team[]
@@ -183,7 +185,7 @@ model Tokenomics {
   tokenName    String      @map("token_name")
   totalTokens  Int         @map("total_tokens")
   tokenTicker  String      @map("token_ticker")
-  tokenomic    Tokenomic[]
+  tokenomics   Tokenomic[]
   project      Project     @relation(fields: [project_slug], references: [slug], onDelete: Cascade)
   project_slug String      @unique
 
@@ -211,7 +213,7 @@ model Whitelist {
   id            String            @id @default(cuid())
   created_at    DateTime          @default(now())
   updated_at    DateTime          @updatedAt
-  name          String            @unique
+  name          String
   slug          String            @unique
   startDateTime DateTime          @map("start_date_time")
   endDateTime   DateTime          @map("end_date_time")
@@ -272,10 +274,10 @@ model FisoApprovedStakePool {
 }
 
 model SpoSignups {
-  id               String    @id @default(cuid())
+  id               Int       @id @default(autoincrement())
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
-  poolId           String    @map("pool_id")
+  poolId           String    @unique @map("pool_id")
   stakepool        Stakepool @relation(fields: [poolId], references: [pool_id], onDelete: Cascade)
   fisos            Fiso[]
   operatorName     String?   @map("operator_name")
@@ -300,7 +302,7 @@ model Stakepool {
   stats       StakepoolStats?
   history     StakepoolHistory[]
   fisoPools   FisoApprovedStakePool[]
-  SpoSignups  SpoSignups[]
+  spoSignups  SpoSignups?
 
   @@map("stakepools")
 }
@@ -355,6 +357,7 @@ model StakepoolHistory {
   stakepool        Stakepool @relation(fields: [pool_id], references: [pool_id], onDelete: Cascade)
   pool_id          String
 
+  @@unique([epoch, pool_id])
   @@index([epoch, pool_id])
   @@map("stakepool_history")
 }

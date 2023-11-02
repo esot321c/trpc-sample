@@ -13,6 +13,7 @@ export {
 };
 
 const TSocials = z.object({
+  id: z.number().optional(),
   telegram: z.string().optional(),
   twitter: z.string().optional(),
   discord: z.string().optional(),
@@ -21,12 +22,14 @@ const TSocials = z.object({
 });
 
 const TRoadmap = z.object({
+  id: z.number().optional(),
   name: z.string(),
   description: z.string(),
   date: z.date(),
 });
 
 const TTeam = z.object({
+  id: z.number().optional(),
   name: z.string(),
   description: z.string(),
   profileImgUrl: z.string().optional(),
@@ -35,6 +38,7 @@ const TTeam = z.object({
 });
 
 const TTokenomic = z.object({
+  id: z.number().optional(),
   name: z.string(),
   amount: z.number(),
   value: z.string().optional(),
@@ -45,6 +49,7 @@ const TTokenomic = z.object({
 });
 
 const TTokenomics = z.object({
+  id: z.number().optional(),
   tokenName: z.string(),
   totalTokens: z.number(),
   tokenTicker: z.string(),
@@ -61,6 +66,7 @@ const TWhitelistSignup = z.object({
 });
 
 const TWhitelist = z.object({
+  id: z.string().optional(),
   name: z.string(),
   slug: z.string(),
   startDateTime: z.date(),

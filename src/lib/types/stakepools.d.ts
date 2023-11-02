@@ -1,15 +1,23 @@
 import {
   TFiso as ZodFiso,
   TFisoApprovedStakePool as ZodFisoApprovedStakePool,
-  TSpoSignups as ZodSpoSignups,
-  TStakepool as ZodStakepool,
+  TStakepool as ZodStakepool
 } from '@lib/types/zod-schemas/fisoSchema';
 import { z } from 'zod';
 
 declare global {
   type TFiso = z.infer<typeof ZodFiso>;
   type TFisoApprovedStakePool = z.infer<typeof ZodFisoApprovedStakePool>;
-  type TSpoSignups = z.infer<typeof ZodSpoSignups>;
+  type TSpoSignups = {
+    id: number;
+    poolId: string;
+    operatorName?: string;
+    operatorEmail?: string;
+    operatorTwitter?: string;
+    operatorDiscord?: string;
+    operatorTelegram?: string;
+    fisos: TFiso[]
+  };
   type TStakepool = z.infer<typeof ZodStakepool>;
 
   type TStakepoolStats = {
@@ -19,11 +27,11 @@ declare global {
     pool_id: string;
     vrf_key: string;
     live_size: number;
-    created_at: string;
+    created_at: Date;
     fixed_cost: string;
     live_stake: string;
     retirement: any[];
-    updated_at: string;
+    updated_at: Date;
     active_size: number;
     live_pledge: string;
     margin_cost: number;
@@ -36,6 +44,20 @@ declare global {
     live_delegators: number;
     live_saturation: number;
   };
+
+  type TStakePoolWithStats = {
+    id: number;
+    pool_id: string;
+    hex?: string;
+    url?: string;
+    hash?: string;
+    ticker?: string;
+    name?: string;
+    description?: string;
+    homepage?: string;
+    stats: TStakepoolStats;
+    spoSignups: TSpoSignups?;
+  }
 
   type TFullStakePool = {
     id: number;

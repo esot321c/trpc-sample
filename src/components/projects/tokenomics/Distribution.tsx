@@ -41,7 +41,7 @@ const Distribution: FC<IDistribution> = ({ data }) => {
   });
 
   return (
-    <Paper sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3 }}>
+    <Paper sx={{ p: 1 }} variant="outlined">
 
       {checkSmall ? (
         <Table>
@@ -111,7 +111,7 @@ const Distribution: FC<IDistribution> = ({ data }) => {
                         sx={{
                           color: theme.palette.text.secondary,
                           border: 'none',
-                          p: 1,
+
                         }}
                       >
                         {tokenomicsHeading[key]}:

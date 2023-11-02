@@ -4,48 +4,33 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ProjectCard from "@components/projects/ProjectCard";
 import SearchBar from "@components/SearchBar";
+import { trpc } from '@lib/utils/trpc';
 
 const Projects = () => {
   const theme = useTheme()
   // loading spinner for submit button
-  const [isLoading, setLoading] = useState(true);
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<IProjectDetails[]>([]);
   const [searchString, setSearchString] = useState('')
+  const { data: projectList } = trpc.project.getProjectList.useQuery({});
 
   useEffect(() => {
-    const getProjects = async () => {
-      try {
-        const res = await axios.get(`${process.env.API_URL}/projects/`);
-        setProjects(
-          res.data.filter((project: TProject) => project.name.toLowerCase().startsWith('cardano-'))
-            .map((item: TProject) => {
-              const projectName = item.name.replace(/cardano-(x-)?/, "")
-              const category = item.fundsRaised === 9090
-                ? "Launchpad"
-                : "IDO"
-              const details = {
-                title: projectName,
-                tagline: item.shortDescription,
-                imageUrl: item.bannerImgUrl,
-                category: category,
-                status: item.isLaunched
-                  ? "Complete"
-                  : "Upcoming", // 'In Progress', 'Complete'
-                blockchains: item.name.includes("cardano-x-")
-                  ? ['Cardano', 'Ergo']
-                  : ['Cardano']
-              }
-              return (details)
-            })
-        )
-      } catch (e) {
-        console.error(e);
-      }
-      setLoading(false);
-    };
-
-    getProjects();
-  }, []);
+    if (projectList) {
+      setProjects(
+        projectList.map((item) => {
+          const details: IProjectDetails = {
+            title: item.name,
+            tagline: item.shortDescription,
+            category: '',
+            imageUrl: item.bannerImgUrl,
+            status: item.isLaunched
+              ? "Complete"
+              : "Upcoming", // 'In Progress', 'Complete'
+            blockchains: item.blockchains
+          }
+          return (details)
+        }))
+    }
+  }, [projectList]);
 
   const filteredProjects = projects?.filter((project: IProjectDetails) =>
     project.title.toLowerCase().includes(searchString.toLowerCase())
@@ -68,17 +53,7 @@ const Projects = () => {
         </Box>
       </Container>
       <Container sx={{ mt: 1 }}>
-        {isLoading && (
-          <CircularProgress
-            size={24}
-            sx={{
-              position: "absolute",
-              left: "50%",
-              marginLeft: "-12px",
-              marginTop: "72px",
-            }}
-          />
-        )}
+
         {upcomingProjects.length > 0 &&
           <>
             <Typography variant="h4" sx={{ fontWeight: "800", mb: 4 }}>

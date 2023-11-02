@@ -3,30 +3,44 @@ import {
   Box,
   Tooltip
 } from '@mui/material'
+import dayjs from 'dayjs';
 
 const timeRemaining = (endTime: Date) => {
   const now = Date.now()
   const diff = (endTime.getTime() - now) / 1000;
 
-  let seconds: string | number = Math.floor(diff % 60),
-    minutes: string | number = Math.floor((diff / 60) % 60),
-    hours: string | number = Math.floor((diff / (60 * 60)) % 24),
+  let seconds: string | number = Math.floor(diff % 60).toString().padStart(2, '0'),
+    minutes: string | number = Math.floor((diff / 60) % 60).toString().padStart(2, '0'),
+    hours: string | number = Math.floor((diff / (60 * 60)) % 24).toString().padStart(2, '0'),
     days: string | number = Math.floor((diff / (60 * 60)) / 24);
 
-  if (diff < 0) return 'No current sale'
+  let dayWord = 'days'
+  if (days === 1) dayWord = 'day'
 
-  return days + "d, " + hours + "h, " + minutes + "m, " + seconds + "s";
+  if (days > 0) days = `${days} ${dayWord} and `
+  else days = ``
+
+  if (diff < 0) return `00:00:00`
+  return `${days}${hours}:${minutes}:${seconds}`;
 }
 
-const TimeRemaining: FC<{ endTime: Date }> = ({ endTime }) => {
+const TimeRemaining: FC<{ endTime: Date, noDay?: boolean }> = ({ endTime, noDay }) => {
   const [timeLeft, setTimeLeft] = useState(timeRemaining(endTime));
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimeLeft(timeRemaining(endTime));
-    }, 1000);
+    const remainingTimeInSeconds = (endTime.getTime() - new Date().getTime()) / 1000;
+    const lessThan24Hours = remainingTimeInSeconds <= 24 * 60 * 60;
 
-    return () => clearTimeout(timer);
+    if (!noDay || lessThan24Hours) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeRemaining(endTime));
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+    else {
+      setTimeLeft(dayjs(endTime).format('YYYY-MM-DD h:mma'))
+    }
   });
 
   const date = endTime.toString()

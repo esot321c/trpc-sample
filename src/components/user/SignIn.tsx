@@ -93,18 +93,18 @@ export const SignIn: FC<ISignIn> = ({ open, setOpen, setLoading }) => {
                       />
                     </ListItemAvatar>
                     <ListItemText primary={
-                      wallet.icon === VESPR_ICON ? 'Vespr' : wallet.name
+                      wallet.icon === VESPR_ICON ? 'VESPR' : wallet.name
                     } />
                   </ListItemButton>
                 )
               })}
               {/* GitHub Provider */}
-              <ListItemButton onClick={() => handleProviderSignIn("github")}>
+              {/* <ListItemButton onClick={() => handleProviderSignIn("github")}>
                 <ListItemAvatar>
                   <Avatar alt="GitHub Icon" src="/path/to/github-icon.png" sx={{ height: "24px", width: "24px" }} variant="square" />
                 </ListItemAvatar>
                 <ListItemText primary="GitHub" />
-              </ListItemButton>
+              </ListItemButton> */}
             </List>
           )}
         </DialogContent>

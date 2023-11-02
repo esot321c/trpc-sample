@@ -9,16 +9,15 @@ import Head from "next/head";
 import { ThemeContext } from "@contexts/ThemeContext";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import AlertWrapper, { IAlertMessages } from "@components/AlertWrapper";
 import { MeshProvider } from "@meshsdk/react";
 import { trpc } from '@lib/utils/trpc';
 import { SessionProvider } from "next-auth/react"
 import { WalletProvider } from "@contexts/WalletContext";
+import { AlertProvider } from '@contexts/AlertContext';
+import AlertComponent from '@components/Alert';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   const [theme, setTheme] = useState(LightTheme);
-  const [userInfo, setUserInfo] = useState({ address: "" });
-  const [alert, setAlert] = useState<IAlertMessages[]>([]);
 
   useEffect(() => {
     setTheme(
@@ -41,22 +40,17 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
         >
           <ThemeProvider theme={theme}>
             <ThemeContext.Provider value={{ theme, setTheme }}>
-              <MeshProvider>
-                <WalletProvider>
-                  <CssBaseline enableColorScheme />
-                  <Layout>
-                    <Component {...pageProps} />
-                  </Layout>
-                  <AlertWrapper
-                    alerts={alert}
-                    close={(i: number) => {
-                      setAlert((prevState) =>
-                        prevState.filter((_item, idx) => idx !== i)
-                      );
-                    }}
-                  />
-                </WalletProvider>
-              </MeshProvider>
+              <AlertProvider>
+                <MeshProvider>
+                  <WalletProvider>
+                    <CssBaseline enableColorScheme />
+                    <Layout>
+                      <Component {...pageProps} />
+                    </Layout>
+                    <AlertComponent />
+                  </WalletProvider>
+                </MeshProvider>
+              </AlertProvider>
             </ThemeContext.Provider>
           </ThemeProvider>
         </LocalizationProvider>

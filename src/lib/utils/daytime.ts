@@ -15,25 +15,35 @@ export const timeFromNow = (time: Date) => {
 }
 
 export const formatDateForInput = (dateInput: Date | string) => {
-  const pad = (number: number) => {
-    if (number < 10) {
-      return '0' + number;
+  const pad = (number: number) => (number < 10 ? '0' + number : number.toString());
+
+  // Helper function to ensure the value is within the specified range
+  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+  // If dateInput is a string, try to correct potential typos
+  if (typeof dateInput === 'string') {
+    const parts = dateInput.split(/[-T:]/);
+
+    if (parts.length >= 5) {
+      const year = clamp(parseInt(parts[0], 10), 1000, 9999);
+      const month = clamp(parseInt(parts[1], 10), 1, 12);
+      const day = clamp(parseInt(parts[2], 10), 1, 31);
+      const hour = clamp(parseInt(parts[3], 10), 0, 23);
+      const minute = clamp(parseInt(parts[4], 10), 0, 59);
+
+      return `${pad(year)}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
     }
-    return number;
   }
 
-  // Check if dateInput is a string, and if so, create a new Date object.
-  const dateObject = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  // If dateInput is a Date object or the string couldn't be parsed, convert to Date object
+  const dateObject = dateInput instanceof Date ? dateInput : new Date(dateInput);
 
-  // Check if dateObject is a valid date.
+  // If dateObject is not a valid date, return current date and time set to 12:00 AM.
   if (isNaN(dateObject.getTime())) {
-    throw new Error('Invalid date');
+    const now = new Date();
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T00:00`;
   }
 
-  // getMonth() returns 0-11, not 1-12, so we add 1 to the result.
-  return dateObject.getFullYear() +
-    '-' + pad(dateObject.getMonth() + 1) +
-    '-' + pad(dateObject.getDate()) +
-    'T' + pad(dateObject.getHours()) +
-    ':' + pad(dateObject.getMinutes());
-}
+  // If date is valid, format and return it.
+  return `${dateObject.getFullYear()}-${pad(dateObject.getMonth() + 1)}-${pad(dateObject.getDate())}T${pad(dateObject.getHours())}:${pad(dateObject.getMinutes())}`;
+};

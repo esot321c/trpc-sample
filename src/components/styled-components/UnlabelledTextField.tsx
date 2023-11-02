@@ -39,6 +39,10 @@ const UnlabelledTextField: FC<TUnlabelledTextFieldProps> = (props) => {
           '& .MuiFilledInput-before': { display: 'none' },
           '& .MuiFilledInput-after': { display: 'none' },
         },
+        '& .Mui-error': {
+          borderColor: theme.palette.error.dark,
+          borderWidth: '2px'
+        }
       }}
     />
   );

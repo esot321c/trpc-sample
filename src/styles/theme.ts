@@ -203,6 +203,18 @@ const mainTheme = [{
         }
       }
     },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          '& a': {
+            textDecoration: 'underline',
+            '&:hover': {
+              textDecoration: 'none',
+            },
+          },
+        },
+      },
+    },
     MuiSlider: {
       styleOverrides: {
         root: {
