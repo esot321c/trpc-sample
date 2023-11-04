@@ -25,6 +25,7 @@ import { getShortAddress } from '@lib/utils/general';
 import { trpc } from "@lib/utils/trpc";
 import { signIn, signOut } from "next-auth/react"
 import { useWalletContext } from '@contexts/WalletContext';
+import { useAlert } from '@contexts/AlertContext';
 
 interface IWalletType {
   name: string;
@@ -39,6 +40,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const theme = useTheme()
   const desktop = useMediaQuery(theme.breakpoints.up('md'))
   const router = useRouter();
+  const { addAlert } = useAlert()
   const [modalOpen, setModalOpen] = useState(false)
   const { wallet, connected, name, connecting, connect, disconnect, error } = useWallet()
   const [rewardAddress, setRewardAddress] = useState<string | undefined>(undefined);
@@ -87,7 +89,8 @@ const UserMenu: FC<IUserMenuProps> = () => {
   const connectFirstThenGetAddresses = async () => {
     try {
       if (sessionStatus === 'authenticated' && sessionData?.user.walletType) {
-        await connect(sessionData.user.walletType);
+        if (sessionData?.user.walletType === 'Begin Wallet') await connect('VESPR');
+        else await connect(sessionData.user.walletType);
       }
       else throw new Error('not authenticated')
     } catch (error) {
@@ -146,6 +149,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
 
       if (!signature.signature || !signature.key) {
         console.error('signature failed to generate');
+        addAlert('error', 'Message signing failed. ')
         cleanupForAuth(nonce);
         return;
       }
@@ -173,6 +177,7 @@ const UserMenu: FC<IUserMenuProps> = () => {
 
       } catch (error) {
         console.error('Error during signIn:', error);
+        addAlert('error', `Error during signIn: ${error}`)
         cleanupForAuth(nonce);
         return;
       }
@@ -229,7 +234,8 @@ const UserMenu: FC<IUserMenuProps> = () => {
             sx={{
               color: theme.palette.text.primary,
               border: `1px solid ${theme.palette.divider}`,
-              borderRadius: '4px'
+              borderRadius: '4px',
+              mr: desktop ? 0 : 1
             }}
             disabled={providerLoading}
             onClick={handleClick}
@@ -237,12 +243,11 @@ const UserMenu: FC<IUserMenuProps> = () => {
             {providerLoading ? <Typography>Loading...</Typography> :
               (
                 <>
-                  <Avatar src={sessionData.user.image ?? walletIcon} sx={{ width: '24px', height: '24px', mr: 1 }} variant="square" />
+                  <Avatar src={sessionData.user.image ?? walletIcon} sx={{ width: '24px', height: '24px', mr: desktop ? 1 : null }} variant="square" />
                   {changeAddress && desktop &&
                     <Typography>
                       {getShortAddress(changeAddress)}
                     </Typography>
-
                   }
                 </>
               )}

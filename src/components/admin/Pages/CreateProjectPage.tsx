@@ -574,6 +574,7 @@ const CreateProjectForm: FC = () => {
               whitelists: [...updatedData],
             });
           }}
+          projectSlug={formData.slug}
         />
 
 

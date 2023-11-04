@@ -5,10 +5,11 @@ interface StyledLinearProgressProps extends LinearProgressProps {
   barColor?: string;
   barColorStart?: string;
   barColorEnd?: string;
+  bgColor?: string;
   sx?: SxProps<Theme>;
 }
 
-export const LinearProgressStyled: FC<StyledLinearProgressProps> = ({ sx, barColor, barColorStart, barColorEnd, ...props }) => {
+export const LinearProgressStyled: FC<StyledLinearProgressProps> = ({ sx, barColor, barColorStart, barColorEnd, bgColor, ...props }) => {
   const theme = useTheme();
 
   const mergeSx = (defaultSx: SxProps<Theme>, newSx?: SxProps<Theme>) => {
@@ -26,7 +27,7 @@ export const LinearProgressStyled: FC<StyledLinearProgressProps> = ({ sx, barCol
         borderRadius: 5,
         border: `1px solid ${theme.palette.divider}`,
         [`&.${linearProgressClasses.colorPrimary}`]: {
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: bgColor || theme.palette.background.paper,
         },
         [`& .${linearProgressClasses.bar}`]: {
           borderRadius: 5,

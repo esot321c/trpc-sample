@@ -26,9 +26,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </Head>
       <Box
         sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           position: 'fixed',
           top: 0,
           left: 0,
+          m: 0,
+          p: 0,
           opacity: backdrop ? '1' : '0',
           width: '100vw',
           height: '100vh',
@@ -36,15 +41,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           zIndex: 999,
           color: '#fff',
           transition: 'opacity 500ms',
-          pointerEvents: backdrop ? 'auto' : 'none'
+          pointerEvents: backdrop ? 'auto' : 'none',
         }}
       >
-        <CircularProgress color="inherit" sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)"
-        }} />
+        <CircularProgress color="inherit" />
       </Box>
       <Header />
       <Box

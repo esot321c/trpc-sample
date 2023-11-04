@@ -95,7 +95,7 @@ const WhitelistCard: FC<WhitelistCardProps> = ({
       <Paper
         variant="outlined"
         sx={{
-          borderRadius: '12px',
+          borderRadius: '6px',
           p: 2,
           gap: 2,
           mb: 2
@@ -152,7 +152,7 @@ const WhitelistCard: FC<WhitelistCardProps> = ({
                     textTransform: 'none',
                     fontSize: '20px',
                     fontWeight: 600,
-                    borderRadius: '12px'
+                    borderRadius: '6px'
                   }}
                   href={externalLink}
                   target="_blank"
@@ -172,7 +172,7 @@ const WhitelistCard: FC<WhitelistCardProps> = ({
                     textTransform: 'none',
                     fontSize: '20px',
                     fontWeight: 600,
-                    borderRadius: '12px'
+                    borderRadius: '6px'
                   }}
                 >
                   Already signed up
@@ -191,7 +191,7 @@ const WhitelistCard: FC<WhitelistCardProps> = ({
                         textTransform: 'none',
                         fontSize: '20px',
                         fontWeight: 600,
-                        borderRadius: '12px'
+                        borderRadius: '6px'
                       }}
                     >
                       Submit Whitelist

@@ -266,7 +266,6 @@ export const fisoRouter = createTRPCRouter({
       const fiso = input.fisoId;
       const epoch = input.currentEpochProvided;
 
-
       let address: string | undefined = undefined
 
       if (ctx.session) {

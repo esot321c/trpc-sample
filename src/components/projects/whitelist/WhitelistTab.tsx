@@ -30,7 +30,7 @@ const WhitelistTab: FC<WhitelistTabProps> = ({ whitelists, projectSlug }) => {
         {sessionStatus === 'authenticated' ? (
           <>
             <Box sx={{ mb: 2 }}>
-              <Collapse in={checkVerificationResult.data?.sumsubStatus === 'completed'} mountOnEnter unmountOnExit>
+              {/* <Collapse in={checkVerificationResult.data?.sumsubStatus === 'completed'} mountOnEnter unmountOnExit>
                 <Alert
                   variant="outlined"
                   severity={
@@ -40,6 +40,7 @@ const WhitelistTab: FC<WhitelistTabProps> = ({ whitelists, projectSlug }) => {
                         ? 'success'
                         : 'error'
                   }
+                  sx={{ mb: 2 }}
                 >
                   KYC Status: {
                     !checkVerificationResult.data?.sumsubResult?.reviewAnswer ?
@@ -80,7 +81,10 @@ const WhitelistTab: FC<WhitelistTabProps> = ({ whitelists, projectSlug }) => {
                       })}
                     </Box>
                   )}
-              </Collapse>
+              </Collapse> */}
+              <Typography>
+                Check back soon for whitelist availability.
+              </Typography>
             </Box>
           </>
         ) : (

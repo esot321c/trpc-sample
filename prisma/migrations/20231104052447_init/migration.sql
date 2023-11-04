@@ -110,8 +110,9 @@ CREATE TABLE "projects" (
     "funds_raised" INTEGER,
     "banner_img_url" TEXT NOT NULL,
     "avatar_img_url" TEXT NOT NULL,
-    "is_launched" BOOLEAN NOT NULL,
-    "is_draft" BOOLEAN NOT NULL,
+    "is_launched" BOOLEAN NOT NULL DEFAULT false,
+    "is_draft" BOOLEAN NOT NULL DEFAULT true,
+    "front_page" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "projects_pkey" PRIMARY KEY ("id")
 );
@@ -342,7 +343,10 @@ CREATE UNIQUE INDEX "users_reward_address_key" ON "users"("reward_address");
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "user_stake_history_active_epoch_user_reward_address_idx" ON "user_stake_history"("active_epoch", "user_reward_address");
+CREATE INDEX "user_stake_history_active_epoch_user_reward_address_pool_id_idx" ON "user_stake_history"("active_epoch", "user_reward_address", "pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_stake_history_active_epoch_user_reward_address_pool_id_key" ON "user_stake_history"("active_epoch", "user_reward_address", "pool_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "verificationtokens_token_key" ON "verificationtokens"("token");
@@ -369,9 +373,6 @@ CREATE UNIQUE INDEX "project_socials_project_slug_key" ON "project_socials"("pro
 CREATE UNIQUE INDEX "project_tokenomics_project_slug_key" ON "project_tokenomics"("project_slug");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "whitelists_name_key" ON "whitelists"("name");
-
--- CreateIndex
 CREATE UNIQUE INDEX "whitelists_slug_key" ON "whitelists"("slug");
 
 -- CreateIndex
@@ -388,6 +389,9 @@ CREATE UNIQUE INDEX "stakepool_cache_spoListKey_key" ON "stakepool_cache"("spoLi
 
 -- CreateIndex
 CREATE INDEX "stakepool_history_epoch_pool_id_idx" ON "stakepool_history"("epoch", "pool_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stakepool_history_epoch_pool_id_key" ON "stakepool_history"("epoch", "pool_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_FisoToSpoSignups_AB_unique" ON "_FisoToSpoSignups"("A", "B");

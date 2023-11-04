@@ -7,43 +7,60 @@ import TimelineDot from '@mui/lab/TimelineDot';
 import Typography from '@mui/material/Typography';
 import Icon from '@mui/material/Icon';
 import dayjs from 'dayjs';
+import { Paper, useMediaQuery, useTheme } from '@mui/material';
 
 const Roadmap = (data: any) => {
+  const theme = useTheme()
+  const desktop = useMediaQuery(theme.breakpoints.up('md'))
   const timelineItems = data
     ? data.data.map((roadmap: any) => {
       return { ...roadmap, date: Date.parse(roadmap.date) };
     })
     : [];
   return (
-    <Timeline>
+    <Timeline position={desktop ? "alternate" : "right"}
+      sx={{
+        // '& .MuiTimelineItem-root:last-child': {
+        //   '& .MuiTimelineContent-root .MuiPaper-root': {
+        //     mb: 0
+        //   }
+        // },
+        ...(!desktop && {
+          '& li': {
+            '&::before': {
+              display: 'none'
+            },
+            '& .MuiTimelineContent-root': {
+              pr: 0
+            }
+          },
+          pr: 0
+        })
+      }}
+    >
       {timelineItems.map((item: any) => {
-        const itemTime = dayjs(item.date).toString()
+        const itemTime = dayjs(item.date).format('MMMM YYYY')
         return (
           <TimelineItem
             key={item.name}
-            sx={{
-              '&::before': {
-                p: 0,
-                flex: 'none',
-              },
-            }}
           >
             <TimelineSeparator>
-              <TimelineDot>
-                <Icon sx={{ color: 'rgb( 29, 29, 32 )' }}>check_circle</Icon>
-              </TimelineDot>
+              <TimelineDot />
               <TimelineConnector />
             </TimelineSeparator>
-            <TimelineContent sx={{ py: '12px', px: 2 }}>
-              <Typography variant="h5" sx={{ mt: '-3px' }}>
-                {item.name}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                {itemTime}
-              </Typography>
-              <Typography variant="body1" sx={{ fontSize: '1rem', mb: 1 }}>
-                {item.description}
-              </Typography>
+            <TimelineContent>
+              <Paper variant="outlined" sx={{ p: 2, mt: -2, mb: 3 }}>
+                <Typography variant="h5" sx={{ mb: 1 }}>
+                  {item.name}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  {itemTime}
+                </Typography>
+                <Typography variant="body1" sx={{ fontSize: '1rem', mb: 1 }}>
+                  {item.description}
+                </Typography>
+
+              </Paper>
             </TimelineContent>
           </TimelineItem>
         );

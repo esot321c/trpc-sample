@@ -13,6 +13,7 @@ import {
   Tab,
   Collapse,
   Alert,
+  Chip,
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import Link from "@components/Link";
@@ -28,6 +29,9 @@ import ProjectInfoTab from "@components/projects/info/ProjectInfoTab";
 import { trpc } from '@lib/utils/trpc';
 import FisoTab from "@components/projects/fiso/FisoTab";
 import { mapFisoObject } from "@server/utils/mapProjectObject";
+import { ContainedTabs, ContainedTab } from "@components/styled-components/ContainedTabs";
+import LinkIcon from '@mui/icons-material/Link';
+import FeedIcon from '@mui/icons-material/Feed';
 
 type TTabs = 'summary' | 'tokenomics' | 'whitelist' | 'contribute' | 'fiso'
 
@@ -87,7 +91,6 @@ const Project = () => {
   };
 
   const socialButtonSx = {
-    mr: 1,
     color: theme.palette.text.primary,
     '&:hover': {
       color: theme.palette.primary.main
@@ -113,7 +116,7 @@ const Project = () => {
         </Box>
         : projectData ?
           <Container maxWidth="lg" sx={{ pt: 6 }}>
-            <Grid container spacing={2} direction={upMd ? 'row' : 'column'} alignItems="center" sx={{ mb: 2 }}>
+            <Grid container spacing={2} direction={upMd ? 'row' : 'column'} alignItems="center" sx={{ mb: 4 }}>
               <Grid item md='auto' sx={{ textAlign: 'center' }}>
                 <Avatar
                   src={projectData.avatarImgUrl}
@@ -124,74 +127,121 @@ const Project = () => {
               <Grid item md>
                 <Typography variant="h2" fontWeight={600}>{projectData.name.replace(/cardano-(x-)?/, "")}</Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>{projectData.shortDescription}</Typography>
-                <Box sx={{ display: "flex", justifyContent: "left", mb: 2 }}>
+                <Grid container direction="row" spacing={2}>
                   {projectData.socials?.website &&
-                    <Link
-                      sx={socialButtonSx}
-                      href={projectData.socials.website}
-                      aria-label={`${projectData.name.replace(/cardano-(x-)?/, "")} website`}
-                    >
-                      <WebIcon />
-                    </Link>
+                    <Grid item>
+                      <Chip
+                        label="Website"
+                        icon={<LinkIcon sx={{ transform: 'rotate(-45deg)', width: '16px', height: '16px' }} />}
+                        component="a"
+                        clickable
+                        sx={{ borderRadius: '6px', border: `1px solid ${theme.palette.divider}` }}
+                        href={projectData.socials.website}
+                        target="_blank"
+                        aria-label={`${projectData.name} website`}
+                      />
+                    </Grid>
                   }
-                  {projectData.socials?.discord &&
-                    <Link
-                      sx={socialButtonSx}
-                      href={projectData.socials.discord}
-                      aria-label="discord"
-                    >
-                      <DiscordIcon />
-                    </Link>
+                  {projectData.whitepaperLink &&
+                    <Grid item>
+                      <Chip
+                        label="Whitepaper"
+                        icon={<FeedIcon sx={{ width: '16px', height: '16px' }} />}
+                        component="a"
+                        clickable
+                        sx={{ borderRadius: '6px', border: `1px solid ${theme.palette.divider}` }}
+                        href={projectData.whitepaperLink}
+                        target="_blank"
+                        aria-label={`${projectData.name} whitepaper`}
+                      />
+                    </Grid>
                   }
                   {projectData.socials?.github &&
-                    <Link
-                      sx={socialButtonSx}
-                      href={projectData.socials.github}
-                      aria-label="github"
-                    >
-                      <GithubIcon />
-                    </Link>
+                    <Grid item>
+                      <Chip
+                        label="Github"
+                        icon={<GithubIcon sx={{ width: '16px', height: '16px', mr: -1, ml: 1 }} />}
+                        component="a"
+                        clickable
+                        sx={{ borderRadius: '6px', border: `1px solid ${theme.palette.divider}` }}
+                        href={projectData.socials.github}
+                        target="_blank"
+                        aria-label={`${projectData.name} Github link`}
+                      />
+                    </Grid>
+                  }
+                  {projectData.socials?.discord &&
+                    <Grid item>
+                      <Chip
+                        label="Discord"
+                        icon={<DiscordIcon sx={{ width: '16px', height: '16px', mr: -1, ml: 1 }} />}
+                        component="a"
+                        clickable
+                        sx={{ borderRadius: '6px', border: `1px solid ${theme.palette.divider}` }}
+                        href={projectData.socials.discord}
+                        target="_blank"
+                        aria-label={`${projectData.name} Discord link`}
+                      />
+                    </Grid>
                   }
                   {projectData.socials?.telegram &&
-                    <Link
-                      sx={socialButtonSx}
-                      href={projectData.socials.telegram}
-                      aria-label="Telegram"
-                    >
-                      <TelegramIcon />
-                    </Link>
+                    <Grid item>
+                      <Chip
+                        label="Telegram"
+                        icon={<TelegramIcon sx={{ width: '16px', height: '16px', mr: -1, ml: 1 }} />}
+                        component="a"
+                        clickable
+                        sx={{ borderRadius: '6px', border: `1px solid ${theme.palette.divider}` }}
+                        href={projectData.socials.telegram}
+                        target="_blank"
+                        aria-label={`${projectData.name} Telegram link`}
+                      />
+                    </Grid>
                   }
                   {projectData.socials?.twitter &&
-                    <Link
-                      sx={socialButtonSx}
-                      href={projectData.socials.twitter}
-                      aria-label="twitter"
-                    >
-                      <TwitterIcon />
-                    </Link>
+                    <Grid item>
+                      <Chip
+                        label="Twitter"
+                        icon={<TwitterIcon sx={{ width: '16px', height: '16px', mr: -1, ml: 1 }} />}
+                        component="a"
+                        clickable
+                        sx={{ borderRadius: '6px', border: `1px solid ${theme.palette.divider}` }}
+                        href={projectData.socials.twitter}
+                        target="_blank"
+                        aria-label={`${projectData.name} Twitter link`}
+                      />
+                    </Grid>
                   }
-                </Box>
+                </Grid>
               </Grid>
             </Grid>
 
-            <Tabs
+            <ContainedTabs
               value={tabValue}
               onChange={handleTabChange}
               scrollButtons="auto"
               allowScrollButtonsMobile
               variant="scrollable"
-              sx={{
-                '& .MuiTabs-flexContainer': {
-                  justifyContent: upMd ? 'center' : null
-                },
-              }}
+              color={theme.palette.primary.main}
+            // sx={{
+            //   '& .MuiTabs-flexContainer': {
+            //     justifyContent: upMd ? 'center' : null,
+            //     '& .MuiButtonBase-root': {
+            //       fontWeight: 700,
+            //       textTransform: 'none'
+            //     }
+            //   },
+            //   background: theme.palette.background.paper,
+            //   border: `1px solid ${theme.palette.divider}`,
+            //   borderRadius: '6px'
+            // }}
             >
-              <Tab label="Summary" value={'summary'} />
-              <Tab label="Tokenomics" value={'tokenomics'} />
-              <Tab label="Whitelist" value={'whitelist'} />
-              <Tab label="Contribute" value={'contribute'} />
-              {fisoData.length > 0 && <Tab label="FISO" value={'fiso'} />}
-            </Tabs>
+              <ContainedTab label="Summary" value={'summary'} />
+              <ContainedTab label="Tokenomics" value={'tokenomics'} />
+              <ContainedTab label="Whitelist" value={'whitelist'} />
+              <ContainedTab label="Contribute" value={'contribute'} />
+              {fisoData.length > 0 && <ContainedTab label="FISO" value={'fiso'} />}
+            </ContainedTabs>
             <Box sx={{ mb: 12, mt: 2 }}>
               {tabValue === 'summary' && <ProjectInfoTab project={projectData} />}
               {tabValue === 'tokenomics' && <TokenomicsTab tokenomics={projectData.tokenomics} />}
